@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { OrganizerToolbar } from "./OrganizerToolbar";
 
 interface PulseGridProps {
     pulseId: string;
@@ -31,11 +32,21 @@ const getDates = (viewType: string, startDate?: string) => {
     return dates;
 };
 
+
+
 const formatHour = (h: number) => {
     const ampm = h >= 12 ? 'PM' : 'AM';
     const hour12 = h % 12 || 12;
     return `${hour12} ${ampm}`;
 }
+
+const getHeatmapClass = (count: number, maxCount: number) => {
+    if (count === 0) return "bg-white";
+    const ratio = count / Math.max(maxCount, 2);
+    if (ratio < 0.33) return "bg-sky-100";
+    if (ratio < 0.66) return "bg-sky-300";
+    return "bg-sky-600";
+};
 
 export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, startDate, mode = "times" }: PulseGridProps) {
     const [dates, setDates] = useState(() => getDates(viewType, startDate));
@@ -53,7 +64,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
     const supabase = createClient();
 
     // Organizer Selection State
-    const [selectedFinal, setSelectedFinal] = useState<string | null>(null);
+    const [selectedFinal, setSelectedFinal] = useState<Set<string>>(new Set());
     const [isFinalizing, setIsFinalizing] = useState(false);
 
     // Drag Selection State
@@ -153,11 +164,13 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
     const [adminMode, setAdminMode] = useState(false); // false = Voting, true = Finalizing
 
     const handleMouseDown = (d: Date, hour: number) => {
-        // Validation: If Finalizing, use Single Select Logic
+        // Validation: If Finalizing, use Multi-Select Logic
         if (isOrganizer && adminMode) {
             const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${hour}`;
-            if (selectedFinal === key) setSelectedFinal(null);
-            else setSelectedFinal(key);
+            const newSet = new Set(selectedFinal);
+            if (newSet.has(key)) newSet.delete(key);
+            else newSet.add(key);
+            setSelectedFinal(newSet);
             return;
         }
 
@@ -179,59 +192,71 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
     };
 
     const handleFinalize = async () => {
-        if (!selectedFinal) return;
+        if (selectedFinal.size === 0) return;
         setIsFinalizing(true);
 
-        const [y, m, d, h] = selectedFinal.split('-').map(Number);
-        const start = new Date(y, m, d, h, 0, 0);
-        let end = new Date(start);
+        const selectionArray: { start: string, end: string }[] = [];
 
-        if (mode === 'dates') {
-            end.setHours(23, 59, 59, 999);
-        } else {
-            end.setHours(h + 1);
-        }
+        selectedFinal.forEach(key => {
+            const [y, m, d, h] = key.split('-').map(Number);
+            const start = new Date(y, m, d, h, 0, 0);
+            let end = new Date(start);
+
+            if (mode === 'dates') {
+                end.setHours(23, 59, 59, 999);
+            } else {
+                end.setHours(h + 1);
+            }
+            selectionArray.push({ start: start.toISOString(), end: end.toISOString() });
+        });
+
+        // Store first choice in legacy columns for backward compatibility, and full array in new column
+        const first = selectionArray[0];
 
         await supabase.from("pulses").update({
             status: "confirmed",
-            finalized_start: start.toISOString(),
-            finalized_end: end.toISOString()
+            finalized_start: first.start,
+            finalized_end: first.end,
+            finalized_selection: selectionArray
         }).eq("id", pulseId);
     };
 
     // Render Date Mode (Calendar Grid)
     if (mode === 'dates') {
+        const startOffset = dates.length > 0 ? dates[0].getDay() : 0;
+        const spacers = Array.from({ length: startOffset }, (_, i) => i);
+
         return (
-            <div className="pb-24 p-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 select-none">
-                    {dates.map((d) => {
-                        // Key for Date Mode is just the date with hour 0
+            <div className="pb-32 p-4 max-w-7xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 select-none">
+                    {/* Spacers for Grid Alignment */}
+                    {spacers.map((s) => (
+                        <div key={`spacer-${s}`} className="hidden lg:block"></div>
+                    ))}
+
+                    {dates.map((d, i) => {
                         const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-0`;
                         const count = heatmapCounts[key] || 0;
                         const isSelected = myAvailability.has(key);
-                        const isFinalSelection = selectedFinal === key;
+                        const isFinalSelection = selectedFinal.has(key);
 
-                        let bgClass = "bg-white";
-                        if (count > 0) {
-                            const ratio = count / Math.max(maxCount, 2);
-                            if (ratio < 0.33) bgClass = "bg-blue-100";
-                            else if (ratio < 0.66) bgClass = "bg-blue-300";
-                            else bgClass = "bg-blue-600";
-                        }
+                        let bgClass = getHeatmapClass(count, maxCount);
 
-                        if (isOrganizer && adminMode && isFinalSelection) bgClass = "bg-green-500";
+                        if (isOrganizer && adminMode && isFinalSelection) bgClass = "bg-blue-600 shadow-blue-300/50 shadow-lg scale-105 z-10 text-white";
 
-                        // Define month-specific border colors
                         const today = new Date();
                         const isCurrentMonth = d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
 
                         let monthBorder = "";
                         if (isCurrentMonth) {
-                            monthBorder = "border-emerald-400"; // Green for current month
+                            monthBorder = "border-sky-400";
                         } else {
-                            const blueShades = ["border-blue-300", "border-sky-300", "border-indigo-300", "border-cyan-300"];
-                            monthBorder = blueShades[d.getMonth() % blueShades.length];
+                            const colors = ["border-sky-200", "border-blue-200", "border-cyan-200", "border-indigo-200"];
+                            monthBorder = colors[d.getMonth() % colors.length];
                         }
+
+                        // Staggered Animation Delay
+                        const delay = i * 20; // 20ms stagger
 
                         return (
                             <div
@@ -239,22 +264,23 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 onMouseDown={() => handleMouseDown(d, 0)}
                                 onMouseEnter={() => handleMouseEnter(d, 0)}
                                 className={`
-                                    relative flex flex-col items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all shadow-sm
+                                    relative flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 cursor-pointer
                                     ${bgClass}
-                                    ${isSelected && !isOrganizer ? 'ring-2 ring-blue-600 border-blue-600 z-10' : `${monthBorder} hover:border-blue-400 hover:shadow-md`}
+                                    ${isSelected && !isOrganizer ? 'ring-4 ring-sky-400/30 border-sky-500 shadow-xl scale-105 z-20' : `${monthBorder} hover:shadow-xl hover:scale-105 hover:-translate-y-1`}
+                                    ring-1 ring-black/5
                                 `}
                             >
-                                <div className={`text-xs font-bold uppercase mb-1 ${count / maxCount > 0.5 ? 'text-white/80' : 'text-slate-500'}`}>
+                                <div className={`text-xs font-bold uppercase mb-2 tracking-widest ${count / maxCount > 0.5 ? 'text-white/90' : 'text-slate-400'}`}>
                                     {d.toLocaleDateString("en-US", { weekday: "short" })}
                                 </div>
-                                <div className={`text-2xl font-black ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-800'}`}>
-                                    <span className="text-xs font-semibold block uppercase mb-[-4px] tracking-wide opacity-60">
+                                <div className={`text-3xl font-black mb-1 ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-800'}`}>
+                                    <span className="text-[10px] font-bold block uppercase mb-1 tracking-widest opacity-60 text-center leading-none">
                                         {d.toLocaleDateString("en-US", { month: "short" })}
                                     </span>
                                     {d.getDate()}
                                 </div>
-                                <div className={`text-xs mt-1 font-medium ${count / maxCount > 0.5 ? 'text-white/80' : 'text-slate-400'}`}>
-                                    {count > 0 ? `${count} available` : 'Available?'}
+                                <div className={`text-[10px] font-bold uppercase tracking-wide bg-black/10 px-2 py-1 rounded-full ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-400'}`}>
+                                    {count > 0 ? `${count} Free` : 'Add'}
                                 </div>
                             </div>
                         );
@@ -262,35 +288,19 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                 </div>
 
                 {isOrganizer && (
-                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-lg flex justify-between items-center bg-opacity-95 backdrop-blur z-50 gap-4">
-                        <button
-                            onClick={() => setAdminMode(!adminMode)}
-                            className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${adminMode ? 'bg-slate-100 text-slate-600' : 'bg-blue-100 text-blue-700'}`}
-                        >
-                            {adminMode ? "Back to Voting" : "Switch to Finalize"}
-                        </button>
-
-                        {adminMode ? (
-                            <button
-                                onClick={handleFinalize}
-                                disabled={!selectedFinal || isFinalizing}
-                                className="flex-1 bg-green-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-green-700 disabled:opacity-50 disabled:grayscale transition-all shadow-md"
-                            >
-                                {isFinalizing ? "Confirming..." : "Finalize Date"}
-                            </button>
-                        ) : (
-                            <div className="text-sm text-slate-500">
-                                Voting Mode Active
-                            </div>
-                        )}
-                    </div>
+                    <OrganizerToolbar
+                        adminMode={adminMode}
+                        setAdminMode={setAdminMode}
+                        handleFinalize={handleFinalize}
+                        isFinalizing={isFinalizing}
+                        selectedFinalSize={selectedFinal.size}
+                    />
                 )}
             </div>
         );
     }
 
-    // Render Time Mode (Existing Horizontal Scroll) with Month Headers
-    // Group columns by Month to determine header spans
+    // Render Time Mode (Timeline)
     const timeMonths: { name: string; colspan: number; color: string }[] = [];
     let currentMonth = "";
     let span = 0;
@@ -302,7 +312,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                 timeMonths.push({
                     name: currentMonth,
                     colspan: span,
-                    color: timeMonths.length % 2 === 0 ? "bg-slate-50" : "bg-blue-50/50"
+                    color: timeMonths.length % 2 === 0 ? "bg-sky-50/50" : "bg-white"
                 });
             }
             currentMonth = m;
@@ -311,91 +321,77 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
             span++;
         }
 
-        // Push last
         if (i === dates.length - 1) {
             timeMonths.push({
                 name: currentMonth,
                 colspan: span,
-                color: timeMonths.length % 2 === 0 ? "bg-slate-50" : "bg-blue-50/50"
+                color: timeMonths.length % 2 === 0 ? "bg-sky-50/50" : "bg-white"
             });
         }
     });
 
     return (
-        <div className="overflow-x-auto pb-24 relative select-none">
-            <div className="min-w-[800px]">
-                {/* Month Header */}
-                <div className="flex bg-white sticky top-0 z-20 shadow-sm">
-                    <div className="w-16 flex-shrink-0 bg-slate-50 border-r border-slate-100"></div>
-                    {timeMonths.map((m, i) => (
-                        <div
-                            key={i}
-                            style={{ flexGrow: m.colspan, flexBasis: 0 }}
-                            className={`py-1 text-center text-xs font-bold text-slate-500 uppercase tracking-widest border-r last:border-r-0 border-b border-slate-200 ${m.color}`}
-                        >
-                            {m.name}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Day Header */}
-                <div className="flex border-b border-slate-200">
-                    <div className="w-16 flex-shrink-0 bg-slate-50 border-r border-slate-100"></div>
-                    {dates.map((d, i) => {
-                        const isAltMonth = d.getMonth() % 2 !== 0;
-
-                        return (
-                            <div key={i} className={`flex-1 px-1 py-2 text-center border-r border-slate-100 ${isAltMonth ? 'bg-slate-50/30' : 'bg-white'}`}>
-                                <div className="text-xs font-bold text-slate-500">{d.toLocaleDateString("en-US", { weekday: "short" })}</div>
-                                <div className="text-sm font-bold text-slate-800">{d.getDate()}</div>
+        <div className="w-full h-full overflow-auto relative select-none scrollbar-hide p-4 pb-32">
+            <div className="min-w-[800px] bg-white/70 backdrop-blur-md rounded-3xl shadow-sm border border-white/50 ring-1 ring-black/5 mx-auto overflow-visible">
+                {/* Sticky Header Wrapper */}
+                <div className="sticky top-0 z-30 shadow-sm rounded-t-[1.5rem] overflow-hidden">
+                    {/* Month Header */}
+                    <div className="flex bg-slate-50/95 backdrop-blur border-b border-slate-100">
+                        <div className="w-20 flex-shrink-0 bg-slate-50 border-r border-slate-100"></div>
+                        {timeMonths.map((m, i) => (
+                            <div
+                                key={i}
+                                style={{ flexGrow: m.colspan, flexBasis: 0 }}
+                                className={`py-3 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-r border-slate-100 last:border-r-0 ${m.color}`}
+                            >
+                                {m.name}
                             </div>
-                        )
-                    })}
+                        ))}
+                    </div>
+
+                    {/* Day Header */}
+                    <div className="flex border-b border-slate-100 bg-white/95 backdrop-blur">
+                        <div className="w-20 flex-shrink-0 border-r border-slate-100 bg-white"></div>
+                        {dates.map((d, i) => {
+                            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                            return (
+                                <div key={i} className={`flex-1 px-1 py-4 text-center border-r border-slate-50 ${isWeekend ? 'bg-sky-50/30' : 'bg-white'}`}>
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{d.toLocaleDateString("en-US", { weekday: "short" })}</div>
+                                    <div className="text-xl font-black text-slate-800">{d.getDate()}</div>
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
 
                 {/* Rows */}
                 {hours.map((hour) => (
-                    <div key={hour} className={`flex border-b border-slate-100 ${(mode as string) === 'dates' ? 'h-32' : 'h-12'}`}>
-                        <div className="w-16 flex-shrink-0 flex items-start justify-end pr-2 pt-1 text-[10px] text-slate-400 font-mono bg-slate-50 uppercase leading-none">
-                            {(mode as string) === 'dates' ? 'ALL DAY' : formatHour(hour)}
+                    <div key={hour} className="flex border-b border-slate-50 h-16 group/row hover:bg-sky-50/30 transition-colors">
+                        <div className="w-20 flex-shrink-0 flex items-center justify-end pr-4 text-[10px] font-bold text-slate-400 bg-white border-r border-slate-100 uppercase tracking-wider">
+                            {formatHour(hour)}
                         </div>
 
                         {dates.map((d) => {
                             const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${hour}`;
                             const count = heatmapCounts[key] || 0;
                             const isSelected = myAvailability.has(key);
-                            const isFinalSelection = selectedFinal === key;
+                            const isFinalSelection = selectedFinal.has(key);
 
-                            // Alternate background based on month
-                            const isAltMonth = d.getMonth() % 2 !== 0;
-                            let baseBg = isAltMonth ? "bg-slate-50/50" : "bg-white";
+                            let bgClass = count > 0 ? getHeatmapClass(count, maxCount) : "bg-transparent";
 
-                            let bgClass = baseBg;
-                            if (count > 0) {
-                                const ratio = count / Math.max(maxCount, 2);
-                                if (ratio < 0.33) bgClass = "bg-blue-100";
-                                else if (ratio < 0.66) bgClass = "bg-blue-300";
-                                else bgClass = "bg-blue-600";
-                            }
-
-                            // Organizer Overlay
-                            if (isOrganizer && adminMode && isFinalSelection) bgClass = "bg-green-500";
+                            if (isOrganizer && adminMode && isFinalSelection) bgClass = "bg-blue-500 shadow-inner";
 
                             return (
                                 <div
                                     key={key}
                                     onMouseDown={() => handleMouseDown(d, hour)}
                                     onMouseEnter={() => handleMouseEnter(d, hour)}
-                                    className={`flex-1 border-r border-slate-100 cursor-pointer transition-colors relative group`}
+                                    className="flex-1 border-r border-slate-50 cursor-pointer relative group"
                                 >
-                                    <div className={`absolute inset-0.5 rounded-md ${bgClass} ${isSelected && !isOrganizer ? 'ring-2 ring-blue-500 ring-offset-1' : ''}`}>
-                                        {/* Hover Effect */}
-                                        <div className="absolute inset-0 rounded-md bg-black opacity-0 group-hover:opacity-5 transition-opacity" />
-
-                                        {/* Count Label */}
+                                    <div className={`absolute inset-1 rounded-lg transition-all duration-200 ${bgClass} ${isSelected && !isOrganizer ? 'ring-2 ring-sky-500 bg-sky-50 z-10 scale-90 shadow-lg' : 'group-hover:scale-95 group-hover:-translate-y-0.5 group-hover:shadow-md'}`}>
                                         {count > 0 && (
                                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <span className={`text-[10px] font-bold ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-600'}`}>{count}</span>
+                                                <span className={`text-[10px] font-bold ${count / maxCount > 0.5 ? 'text-white' : 'text-sky-900/50'}`}>{count}</span>
                                             </div>
                                         )}
                                     </div>
@@ -407,28 +403,13 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
             </div>
 
             {isOrganizer && (
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-lg flex justify-between items-center bg-opacity-95 backdrop-blur z-50 gap-4">
-                    <button
-                        onClick={() => setAdminMode(!adminMode)}
-                        className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${adminMode ? 'bg-slate-100 text-slate-600' : 'bg-blue-100 text-blue-700'}`}
-                    >
-                        {adminMode ? "Back to Voting" : "Switch to Finalize"}
-                    </button>
-
-                    {adminMode ? (
-                        <button
-                            onClick={handleFinalize}
-                            disabled={!selectedFinal || isFinalizing}
-                            className="flex-1 bg-green-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-green-700 disabled:opacity-50 disabled:grayscale transition-all shadow-md"
-                        >
-                            {isFinalizing ? "Confirming..." : "Finalize Pulse"}
-                        </button>
-                    ) : (
-                        <div className="text-sm text-slate-500">
-                            Voting Mode Active
-                        </div>
-                    )}
-                </div>
+                <OrganizerToolbar
+                    adminMode={adminMode}
+                    setAdminMode={setAdminMode}
+                    handleFinalize={handleFinalize}
+                    isFinalizing={isFinalizing}
+                    selectedFinalSize={selectedFinal.size}
+                />
             )}
         </div>
     );

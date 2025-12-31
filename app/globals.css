@@ -1,8 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Modern Palette: Shades of Blue */
+  --background: #f0f9ff;
+  /* Sky-50 */
+  --foreground: #0c4a6e;
+  /* Sky-900 */
+
+  --primary: #0284c7;
+  /* Sky-600 */
+  --primary-light: #38bdf8;
+  /* Sky-400 */
+  --secondary: #e0f2fe;
+  /* Sky-100 */
+
+  --success: #0ea5e9;
+  /* Sky-500 (using Blue for success in mono theme) */
+  --text-muted: #64748b;
+  /* Slate-500 */
 }
 
 @theme inline {
@@ -14,13 +29,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f172a;
+    /* Slate-900 */
+    --foreground: #f8fafc;
+    /* Slate-50 */
   }
 }
+
+
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  @apply antialiased;
+
+  /* Webflow Trend: Subtle Dot Matrix Texture */
+  background-image: radial-gradient(#bae6fd 1px, transparent 1px);
+  background-size: 32px 32px;
 }

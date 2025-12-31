@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { TimeZone } from "@/lib/time";
@@ -11,12 +11,17 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [viewType, setViewType] = useState<"1-day" | "7-day" | "14-day" | "month" | "3-months">("7-day");
   const [pollMode, setPollMode] = useState<"times" | "dates">("times");
-  // Default to today
-  const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
+  // Default to today - initialized in useEffect to avoid hydration mismatch
+  const [startDate, setStartDate] = useState("");
+
+  useEffect(() => {
+    setStartDate(new Date().toISOString().split("T")[0]);
+  }, []);
+
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
-    if (!title.trim()) return;
+    if (!title.trim() || !startDate) return;
     setLoading(true);
 
     try {
@@ -62,95 +67,96 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-6">
-      <div className="w-full max-w-md text-center">
-        <h1 className="text-5xl font-extrabold text-blue-600 mb-2 tracking-tight">Pulse Map</h1>
-        <p className="text-xl text-slate-600 mb-12">
-          Find the perfect time, instantly.
-        </p>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-sky-50">
+      <div className="w-full max-w-lg">
+        <div className="text-center mb-10">
+          <h1 className="text-5xl font-black tracking-tighter text-slate-900 mb-4 bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
+            Pulse Map
+          </h1>
+          <p className="text-lg text-slate-600 font-medium">
+            Coordinate time with anyone, anywhere.
+          </p>
+        </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-          <label className="block text-left text-sm font-bold text-slate-900 uppercase tracking-wide mb-2" htmlFor="title">
-            Event Title
-          </label>
-          <input
-            id="title"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Friday Drinks, Team Sync..."
-            className="w-full mb-6 rounded-xl border border-slate-300 px-4 py-4 text-lg font-bold text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500"
-            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            suppressHydrationWarning
-          />
+        <div className="bg-white p-8 rounded-[2rem] shadow-2xl shadow-sky-100 border border-sky-50">
+          <div className="space-y-6">
+            {/* Title Input */}
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pl-4">Event Name</label>
+              <input
+                placeholder="e.g. Q4 Planning Offsite"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:ring-4 focus:ring-sky-100 transition-all outline-none"
+                suppressHydrationWarning
+              />
+            </div>
 
-          <label className="block text-left text-sm font-bold text-slate-900 uppercase tracking-wide mb-2">
-            Poll Mode
-          </label>
-          <div className="flex gap-2 mb-6">
+            {/* Mode Selection */}
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pl-4">Mode</label>
+              <div className="grid grid-cols-2 gap-2 p-1 bg-slate-50 rounded-2xl border border-slate-100">
+                <button
+                  onClick={() => setPollMode('times')}
+                  className={`py-3 rounded-xl text-sm font-bold transition-all duration-300 ${pollMode === 'times' ? 'bg-white text-sky-600 shadow-md transform scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Specific Times
+                </button>
+                <button
+                  onClick={() => setPollMode('dates')}
+                  className={`py-3 rounded-xl text-sm font-bold transition-all duration-300 ${pollMode === 'dates' ? 'bg-white text-sky-600 shadow-md transform scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Dates Only
+                </button>
+              </div>
+            </div>
+
+            {/* Start Date */}
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pl-4">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 focus:ring-4 focus:ring-sky-100 transition-all outline-none"
+              />
+            </div>
+
+            {/* View Type (Duration) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pl-4">Duration</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: '1-day', label: '1 Day' },
+                  { id: '7-day', label: '1 Week' },
+                  { id: '14-day', label: '2 Weeks' },
+                  { id: 'month', label: '1 Month' },
+                  { id: '3-months', label: '3 Months' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setViewType(opt.id as "1-day" | "7-day" | "14-day" | "month" | "3-months")}
+                    className={`py-3 px-2 rounded-xl text-xs font-bold border transition-all ${viewType === opt.id
+                      ? 'bg-sky-500 border-sky-500 text-white shadow-lg shadow-sky-200'
+                      : 'bg-white border-slate-100 text-slate-500 hover:border-sky-200 hover:text-sky-600'
+                      }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
-              onClick={() => setPollMode("times")}
-              className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${pollMode === "times"
-                ? "bg-slate-900 text-white border-slate-900"
-                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
-                }`}
+              onClick={handleCreate}
+              disabled={loading || !title.trim()}
+              className="w-full mt-4 bg-slate-900 text-white rounded-2xl py-5 text-lg font-black tracking-wide shadow-xl hover:bg-black hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all duration-300"
             >
-              Specific Times
-            </button>
-            <button
-              onClick={() => setPollMode("dates")}
-              className={`flex-1 py-2 rounded-lg text-sm font-bold border transition-all ${pollMode === "dates"
-                ? "bg-slate-900 text-white border-slate-900"
-                : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
-                }`}
-            >
-              Dates Only
+              {loading ? "Creating..." : "Launch Pulse"}
             </button>
           </div>
-
-          <label className="block text-left text-sm font-bold text-slate-900 uppercase tracking-wide mb-2">
-            Timeframe
-          </label>
-          <div className="grid grid-cols-5 gap-2 mb-6">
-            {['1-day', '7-day', '14-day', 'month', '3-months'].map((vt) => (
-              <button
-                key={vt}
-                onClick={() => setViewType(vt as any)}
-                className={`py-2 px-1 rounded-lg text-xs md:text-sm font-bold border transition-all ${viewType === vt
-                  ? 'bg-slate-900 text-white border-slate-900'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
-                  }`}
-              >
-                {vt === '1-day' ? 'Day' : vt === '7-day' ? 'Week' : vt === '14-day' ? '2 Wks' : vt === 'month' ? 'Month' : '3 Months'}
-              </button>
-            ))}
-          </div>
-
-          <label className="block text-left text-sm font-bold text-slate-900 uppercase tracking-wide mb-2" htmlFor="startDate">
-            Start Date
-          </label>
-          <input
-            id="startDate"
-            type="date"
-            value={startDate}
-            min={new Date().toISOString().split("T")[0]}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-full mb-8 rounded-xl border border-slate-300 px-4 py-4 text-lg font-bold text-slate-900 focus:border-blue-500 focus:ring-blue-500"
-          />
-
-          <button
-            onClick={handleCreate}
-            disabled={loading || !title.trim()}
-            className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-700 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
-          >
-            {loading ? "Creating..." : "Start a Pulse"}
-          </button>
-        </div >
-
-        <p className="mt-8 text-sm text-slate-400">
-          No sign-up required. Just share the link.
-        </p>
-      </div >
-    </div >
+        </div>
+      </div>
+    </div>
   );
 }

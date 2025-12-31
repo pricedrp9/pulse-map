@@ -130,7 +130,7 @@ export default function PulseEntryPage() {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-auto p-4">
+                <main className="flex-1 overflow-hidden flex flex-col relative bg-sky-50">
                     <PulseGrid
                         pulseId={id}
                         participantId={joinedParticipantId}
@@ -146,18 +146,20 @@ export default function PulseEntryPage() {
     }
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
-                <div className="mb-6 text-center">
-                    <h1 className="text-3xl font-bold text-slate-800">Pulse Map</h1>
-                    <p className="mt-2 text-slate-500">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-sky-50 p-6">
+            <div className="w-full max-w-md rounded-[2rem] bg-white p-8 shadow-2xl shadow-sky-100 border border-sky-50">
+                <div className="mb-8 text-center">
+                    <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-2 bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
+                        Pulse Map
+                    </h1>
+                    <p className="text-lg text-slate-600 font-medium">
                         {pulse ? `Join "${pulse.title || "Social Event"}"` : "Loading..."}
                     </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                     <div>
-                        <label htmlFor="nickname" className="block text-sm font-medium text-slate-700">
+                        <label htmlFor="nickname" className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pl-4">
                             Your Nickname
                         </label>
                         <input
@@ -166,7 +168,7 @@ export default function PulseEntryPage() {
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
                             placeholder="e.g. Alice"
-                            className="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 focus:border-blue-500 focus:ring-blue-500"
+                            className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:ring-4 focus:ring-sky-100 transition-all outline-none"
                             suppressHydrationWarning
                         />
                     </div>
@@ -174,7 +176,7 @@ export default function PulseEntryPage() {
                     <button
                         onClick={handleJoin}
                         disabled={loading || !pulse || !nickname.trim()}
-                        className="w-full rounded-xl bg-blue-600 py-3.5 font-bold text-white shadow-md transition hover:bg-blue-700 disabled:opacity-50"
+                        className="w-full mt-2 bg-slate-900 text-white rounded-2xl py-5 text-lg font-black tracking-wide shadow-xl hover:bg-black hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all duration-300"
                     >
                         {loading ? "Joining..." : "Continue"}
                     </button>
