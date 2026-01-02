@@ -212,32 +212,31 @@ export default function PulseEntryPage() {
                     />
                 </main>
 
-                {/* Fixed "Done" Button for Responders (and Organizers who joined) */}
-                {(
-                    <button
-                        onClick={handleToggleCompletion}
-                        className={`fixed bottom-12 right-6 z-[999] flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl transition-all duration-300 font-bold border-2 ${isCompleted
+                <button
+                    onClick={handleToggleCompletion}
+                    className={`fixed right-6 z-[1000] flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl transition-all duration-300 font-bold border-2 
+                    ${isOrganizer ? "bottom-24" : "bottom-12"} 
+                    ${isCompleted
                             ? "bg-green-500 text-white border-green-600 shadow-green-200"
                             : "bg-slate-900 text-white border-slate-900 hover:bg-slate-800 hover:scale-105"
-                            }`}
-                    >
-                        {isCompleted ? (
-                            <>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span>Done</span>
-                            </>
-                        ) : (
-                            <>
-                                <span>Done</span>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                            </>
-                        )}
-                    </button>
-                )}
+                        }`}
+                >
+                    {isCompleted ? (
+                        <>
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Done</span>
+                        </>
+                    ) : (
+                        <>
+                            <span>Done</span>
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </>
+                    )}
+                </button>
             </div>
         );
     }
