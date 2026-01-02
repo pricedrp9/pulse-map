@@ -27,6 +27,24 @@ export default function PulseEntryPage() {
 
     const supabase = createClient();
 
+    // Completion Status
+    const [isCompleted, setIsCompleted] = useState(false);
+
+    useEffect(() => {
+        if (!joinedParticipantId) return;
+        const checkStatus = async () => {
+            const { data } = await supabase.from("participants").select("is_completed").eq("id", joinedParticipantId).single();
+            if (data) setIsCompleted(data.is_completed);
+        };
+        checkStatus();
+    }, [joinedParticipantId, supabase]);
+
+    const handleToggleCompletion = async () => {
+        const newVal = !isCompleted;
+        setIsCompleted(newVal);
+        await supabase.from("participants").update({ is_completed: newVal }).eq("id", joinedParticipantId);
+    };
+
     useEffect(() => {
         if (typeof window !== "undefined" && pulse) {
             const createdIds = JSON.parse(localStorage.getItem("created_pulse_ids") || "[]");
@@ -122,23 +140,7 @@ export default function PulseEntryPage() {
         return <ConfirmedView pulse={pulse} participantId={joinedParticipantId || undefined} isOrganizer={isOrganizer} />;
     }
 
-    // Completion Status
-    const [isCompleted, setIsCompleted] = useState(false);
 
-    useEffect(() => {
-        if (!joinedParticipantId) return;
-        const checkStatus = async () => {
-            const { data } = await supabase.from("participants").select("is_completed").eq("id", joinedParticipantId).single();
-            if (data) setIsCompleted(data.is_completed);
-        };
-        checkStatus();
-    }, [joinedParticipantId, supabase]);
-
-    const handleToggleCompletion = async () => {
-        const newVal = !isCompleted;
-        setIsCompleted(newVal);
-        await supabase.from("participants").update({ is_completed: newVal }).eq("id", joinedParticipantId);
-    };
 
     // Only show the grid if we have a valid participant ID, OR if we are an organizer who has joined.
     // If we are organizer but haven't joined, we fall through to the Join Form.

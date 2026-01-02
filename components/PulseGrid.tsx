@@ -270,6 +270,8 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                             <div
                                 key={key}
                                 onMouseDown={() => handleMouseDown(d, 0)}
+                                // Touch Support
+                                onTouchStart={() => handleMouseDown(d, 0)}
                                 onMouseEnter={() => handleMouseEnter(d, 0)}
                                 className={`
                                     relative flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 cursor-pointer touch-pan-y
@@ -393,6 +395,12 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 <div
                                     key={key}
                                     onMouseDown={() => handleMouseDown(d, hour)}
+                                    // Touch Support for Mobile
+                                    onTouchStart={(e) => {
+                                        // Prevent default only if necessary, but careful not to block scroll
+                                        // e.preventDefault(); 
+                                        handleMouseDown(d, hour);
+                                    }}
                                     onMouseEnter={() => handleMouseEnter(d, hour)}
                                     className="flex-1 border-r border-slate-50 cursor-pointer relative group"
                                 >
