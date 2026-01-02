@@ -160,23 +160,6 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
         }
     };
 
-    // Completion Status
-    const [isCompleted, setIsCompleted] = useState(false);
-
-    useEffect(() => {
-        const checkStatus = async () => {
-            const { data } = await supabase.from("participants").select("is_completed").eq("id", participantId).single();
-            if (data) setIsCompleted(data.is_completed);
-        };
-        checkStatus();
-    }, [participantId, supabase]);
-
-    const handleToggleCompletion = async () => {
-        const newVal = !isCompleted;
-        setIsCompleted(newVal);
-        await supabase.from("participants").update({ is_completed: newVal }).eq("id", participantId);
-    };
-
     // Organizer Mode State (Voting vs Finalizing)
     const [adminMode, setAdminMode] = useState(false); // false = Voting, true = Finalizing
 
@@ -435,32 +418,6 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                     isFinalizing={isFinalizing}
                     selectedFinalSize={selectedFinal.size}
                 />
-            )}
-            {/* Submit FAB for Responders */}
-            {!isOrganizer && (
-                <button
-                    onClick={handleToggleCompletion}
-                    className={`fixed bottom-24 right-6 z-[999] flex items-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all duration-300 font-bold ${isCompleted
-                        ? "bg-green-500 text-white hover:bg-green-600 ring-2 ring-green-200"
-                        : "bg-slate-900 text-white hover:bg-slate-800 hover:scale-105"
-                        }`}
-                >
-                    {isCompleted ? (
-                        <>
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span>Done</span>
-                        </>
-                    ) : (
-                        <>
-                            <span>Done</span>
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        </>
-                    )}
-                </button>
             )}
         </div>
     );

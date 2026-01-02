@@ -122,6 +122,24 @@ export default function PulseEntryPage() {
         return <ConfirmedView pulse={pulse} participantId={joinedParticipantId || undefined} isOrganizer={isOrganizer} />;
     }
 
+    // Completion Status
+    const [isCompleted, setIsCompleted] = useState(false);
+
+    useEffect(() => {
+        if (!joinedParticipantId) return;
+        const checkStatus = async () => {
+            const { data } = await supabase.from("participants").select("is_completed").eq("id", joinedParticipantId).single();
+            if (data) setIsCompleted(data.is_completed);
+        };
+        checkStatus();
+    }, [joinedParticipantId, supabase]);
+
+    const handleToggleCompletion = async () => {
+        const newVal = !isCompleted;
+        setIsCompleted(newVal);
+        await supabase.from("participants").update({ is_completed: newVal }).eq("id", joinedParticipantId);
+    };
+
     // Only show the grid if we have a valid participant ID, OR if we are an organizer who has joined.
     // If we are organizer but haven't joined, we fall through to the Join Form.
     if (joinedParticipantId) {
@@ -191,6 +209,33 @@ export default function PulseEntryPage() {
                         mode={pulse?.mode || "times"}
                     />
                 </main>
+
+                {/* Fixed "Done" Button for Responders */}
+                {!isOrganizer && (
+                    <button
+                        onClick={handleToggleCompletion}
+                        className={`fixed bottom-12 right-6 z-[999] flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl transition-all duration-300 font-bold border-2 ${isCompleted
+                            ? "bg-green-500 text-white border-green-600 shadow-green-200"
+                            : "bg-slate-900 text-white border-slate-900 hover:bg-slate-800 hover:scale-105"
+                            }`}
+                    >
+                        {isCompleted ? (
+                            <>
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>Done</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>Done</span>
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </>
+                        )}
+                    </button>
+                )}
             </div>
         );
     }
