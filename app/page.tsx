@@ -68,7 +68,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-sky-50">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-lg relative">
+        <div className="absolute top-0 right-0 -mt-16">
+          <Link href="/dashboard" className="text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            My History
+          </Link>
+        </div>
+
         <div className="text-center mb-10">
           <h1 className="text-5xl font-black tracking-tighter text-slate-900 mb-4 bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
             Pulse Map
@@ -78,7 +87,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="bg-white p-8 rounded-[2rem] shadow-2xl shadow-sky-100 border border-sky-50">
+        <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-2xl shadow-sky-100 border border-sky-50">
           <div className="space-y-6">
             {/* Title Input */}
             <div>

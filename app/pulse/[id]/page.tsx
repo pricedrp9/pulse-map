@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import { PulseGrid } from "@/components/PulseGrid";
 import { ConfirmedView } from "@/components/ConfirmedView";
 import { OrganizerDashboardPulse } from "@/components/OrganizerDashboardPulse";
+import Link from "next/link";
 
 export default function PulseEntryPage() {
     const params = useParams();
@@ -127,7 +128,14 @@ export default function PulseEntryPage() {
         return (
             <div className="flex h-screen flex-col bg-slate-50">
                 <header className="bg-white shadow-sm p-4 flex justify-between items-center z-10">
-                    <h1 className="text-xl font-bold text-slate-800 tracking-tight">{pulse?.title || "Pulse Map"}</h1>
+                    <div className="flex items-center gap-4">
+                        <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 transition-colors">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </Link>
+                        <h1 className="text-xl font-bold text-slate-800 tracking-tight">{pulse?.title || "Pulse Map"}</h1>
+                    </div>
                     <div className="flex items-center gap-3">
                         {isOrganizer && (
                             <OrganizerDashboardPulse id={id} />

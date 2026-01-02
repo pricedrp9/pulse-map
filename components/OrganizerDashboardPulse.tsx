@@ -45,8 +45,8 @@ export function OrganizerDashboardPulse({ id }: { id: string }) {
 
             {isOpen && (
                 <>
-                    <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setIsOpen(false)} />
-                    <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50">
+                    <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity" onClick={() => setIsOpen(false)} />
+                    <div className="absolute right-0 top-full mt-2 w-72 md:w-80 max-w-[90vw] translate-x-[20%] md:translate-x-0 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50 origin-top-right animate-in fade-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-3">
                             <h3 className="font-bold text-slate-800">Who's In?</h3>
                             <span className="text-xs font-bold text-slate-400 uppercase">{participants.filter(p => p.is_completed).length}/{participants.length} Done</span>

@@ -362,7 +362,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                 <div className="sticky top-0 z-30 shadow-sm rounded-t-[1.5rem] overflow-hidden">
                     {/* Month Header */}
                     <div className="flex bg-slate-50/95 backdrop-blur border-b border-slate-100">
-                        <div className="w-20 flex-shrink-0 bg-slate-50 border-r border-slate-100"></div>
+                        <div className="sticky left-0 z-40 w-20 flex-shrink-0 bg-slate-50 border-r border-slate-100 shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)]"></div>
                         {timeMonths.map((m, i) => (
                             <div
                                 key={i}
@@ -376,7 +376,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
 
                     {/* Day Header */}
                     <div className="flex border-b border-slate-100 bg-white/95 backdrop-blur">
-                        <div className="w-20 flex-shrink-0 border-r border-slate-100 bg-white"></div>
+                        <div className="sticky left-0 z-40 w-20 flex-shrink-0 border-r border-slate-100 bg-white shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)]"></div>
                         {dates.map((d, i) => {
                             const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                             return (
@@ -392,7 +392,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                 {/* Rows */}
                 {hours.map((hour) => (
                     <div key={hour} className="flex border-b border-slate-50 h-16 group/row hover:bg-sky-50/30 transition-colors">
-                        <div className="w-20 flex-shrink-0 flex items-center justify-end pr-4 text-[10px] font-bold text-slate-400 bg-white border-r border-slate-100 uppercase tracking-wider">
+                        <div className="sticky left-0 z-20 w-20 flex-shrink-0 flex items-center justify-end pr-4 text-[10px] font-bold text-slate-400 bg-white border-r border-slate-100 uppercase tracking-wider shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)]">
                             {formatHour(hour)}
                         </div>
 
@@ -441,8 +441,8 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                 <button
                     onClick={handleToggleCompletion}
                     className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all duration-300 font-bold ${isCompleted
-                            ? "bg-green-500 text-white hover:bg-green-600 ring-2 ring-green-200"
-                            : "bg-slate-900 text-white hover:bg-slate-800 hover:scale-105"
+                        ? "bg-green-500 text-white hover:bg-green-600 ring-2 ring-green-200"
+                        : "bg-slate-900 text-white hover:bg-slate-800 hover:scale-105"
                         }`}
                 >
                     {isCompleted ? (
