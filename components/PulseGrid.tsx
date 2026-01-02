@@ -213,12 +213,20 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
         // Store first choice in legacy columns for backward compatibility, and full array in new column
         const first = selectionArray[0];
 
-        await supabase.from("pulses").update({
+        const { error } = await supabase.from("pulses").update({
             status: "confirmed",
             finalized_start: first.start,
             finalized_end: first.end,
             finalized_selection: selectionArray
         }).eq("id", pulseId);
+
+        if (!error) {
+            // Trigger Notification API
+            fetch("/api/finalize", {
+                method: "POST",
+                body: JSON.stringify({ pulseId }),
+            }).catch(e => console.error("Notification trigger failed", e));
+        }
     };
 
     // Render Date Mode (Calendar Grid)

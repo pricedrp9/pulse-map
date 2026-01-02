@@ -12,6 +12,7 @@ export default function PulseEntryPage() {
     const id = params?.id as string;
 
     const [nickname, setNickname] = useState("");
+    const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [pulse, setPulse] = useState<any>(null); // Ideally typed
     const [error, setError] = useState("");
@@ -84,6 +85,7 @@ export default function PulseEntryPage() {
                 .insert({
                     pulse_id: id,
                     name: nickname,
+                    email: email || null, // Optional
                     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 })
                 .select("id")
@@ -115,7 +117,7 @@ export default function PulseEntryPage() {
     }
 
     if (pulse && pulse.status === 'confirmed') {
-        return <ConfirmedView pulse={pulse} participantId={joinedParticipantId || undefined} />;
+        return <ConfirmedView pulse={pulse} participantId={joinedParticipantId || undefined} isOrganizer={isOrganizer} />;
     }
 
     // Only show the grid if we have a valid participant ID, OR if we are an organizer who has joined.
@@ -168,6 +170,21 @@ export default function PulseEntryPage() {
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
                             placeholder="e.g. Alice"
+                            className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:ring-4 focus:ring-sky-100 transition-all outline-none"
+                            suppressHydrationWarning
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="email" className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pl-4">
+                            Email (Optional)
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="To get notified when finalized"
                             className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:ring-4 focus:ring-sky-100 transition-all outline-none"
                             suppressHydrationWarning
                         />

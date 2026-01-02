@@ -1,15 +1,66 @@
 import React from 'react';
+import { createClient } from "@/utils/supabase/client";
 
 interface ConfirmedViewProps {
     pulse: any;
     participantId?: string;
+    isOrganizer?: boolean;
 }
 
-export function ConfirmedView({ pulse }: ConfirmedViewProps) {
+export function ConfirmedView({ pulse, isOrganizer }: ConfirmedViewProps) {
+    const supabase = createClient();
     // Check for new Multi-Select format first, otherwise fall back to legacy single slot
     const selections = pulse.finalized_selection || (pulse.finalized_start ? [{ start: pulse.finalized_start, end: pulse.finalized_end }] : []);
 
     if (selections.length === 0) return <div className="p-4">Loading details...</div>;
+
+    const handleDownloadCalendar = () => {
+        let icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PulseMap//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+`;
+
+        selections.forEach((sel: any) => {
+            const start = new Date(sel.start).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            const end = new Date(sel.end).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            const uid = crypto.randomUUID();
+
+            icsContent += `BEGIN:VEVENT
+UID:${uid}
+SUMMARY:${pulse.title || "Pulse Event"}
+DTSTART:${start}
+DTEND:${end}
+DESCRIPTION:Confirmed via Pulse Map.
+STATUS:CONFIRMED
+END:VEVENT
+`;
+        });
+
+        icsContent += `END:VCALENDAR`;
+
+        const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute("download", `${pulse.title || "event"}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleReOpen = async () => {
+        if (!confirm("Are you sure? This will un-finalize the event and allow everyone to vote again.")) return;
+
+        await supabase.from("pulses").update({
+            status: "active",
+            finalized_selection: null,
+            finalized_start: null,
+            finalized_end: null
+        }).eq("id", pulse.id);
+
+        // Page should auto-reload via realtime subscription in parent
+    };
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-green-50 p-6 text-center">
@@ -31,8 +82,8 @@ export function ConfirmedView({ pulse }: ConfirmedViewProps) {
                         return (
                             <div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                 <p className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Option {i + 1}</p>
-                                <div className="mt-2">
-                                    <p className="text-lg font-bold text-slate-900">
+                                <div className="mt-2 text-slate-900">
+                                    <p className="text-lg font-bold">
                                         {s.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                                     </p>
                                     <p className="text-xl font-extrabold text-blue-600 mt-1">
@@ -48,12 +99,23 @@ export function ConfirmedView({ pulse }: ConfirmedViewProps) {
                     })}
                 </div>
 
-                <button
-                    onClick={() => alert("Calendar Integration Coming Soon!")}
-                    className="w-full rounded-xl bg-slate-900 py-3.5 font-bold text-white shadow-md hover:bg-slate-800"
-                >
-                    Add {selections.length > 1 ? 'All' : ''} to Calendar
-                </button>
+                <div className="space-y-3">
+                    <button
+                        onClick={handleDownloadCalendar}
+                        className="w-full rounded-xl bg-slate-900 py-3.5 font-bold text-white shadow-md hover:bg-slate-800 hover:scale-[1.02] transition-all"
+                    >
+                        Add to Calendar (.ics)
+                    </button>
+
+                    {isOrganizer && (
+                        <button
+                            onClick={handleReOpen}
+                            className="w-full rounded-xl bg-white border-2 border-slate-100 py-3.5 font-bold text-slate-500 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-colors"
+                        >
+                            Re-Open Voting
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
