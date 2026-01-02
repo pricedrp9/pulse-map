@@ -139,6 +139,20 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
         else newMySet.add(key);
         setMyAvailability(newMySet);
 
+        // Optimistic Heatmap Update
+        setHeatmapCounts(prev => {
+            const newCounts = { ...prev };
+            const currentCount = newCounts[key] || 0;
+            if (action === 'add') {
+                newCounts[key] = currentCount + 1;
+                // Update Max Count if needed for scaling
+                if (newCounts[key] > maxCount) setMaxCount(newCounts[key]);
+            } else {
+                newCounts[key] = Math.max(0, currentCount - 1);
+            }
+            return newCounts;
+        });
+
         // Calculate Times
         const start = new Date(d);
         let end = new Date(start);
@@ -270,8 +284,6 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                             <div
                                 key={key}
                                 onMouseDown={() => handleMouseDown(d, 0)}
-                                // Touch Support
-                                onTouchStart={() => handleMouseDown(d, 0)}
                                 onMouseEnter={() => handleMouseEnter(d, 0)}
                                 className={`
                                     relative flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 cursor-pointer touch-pan-y
@@ -395,12 +407,6 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 <div
                                     key={key}
                                     onMouseDown={() => handleMouseDown(d, hour)}
-                                    // Touch Support for Mobile
-                                    onTouchStart={(e) => {
-                                        // Prevent default only if necessary, but careful not to block scroll
-                                        // e.preventDefault(); 
-                                        handleMouseDown(d, hour);
-                                    }}
                                     onMouseEnter={() => handleMouseEnter(d, hour)}
                                     className="flex-1 border-r border-slate-50 cursor-pointer relative group"
                                 >
