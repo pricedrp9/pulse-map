@@ -126,7 +126,7 @@ export default function PulseEntryPage() {
     // If we are organizer but haven't joined, we fall through to the Join Form.
     if (joinedParticipantId) {
         return (
-            <div className="flex h-screen flex-col bg-slate-50">
+            <div className="flex min-h-screen flex-col bg-slate-50">
                 <header className="bg-white shadow-sm p-4 flex justify-between items-center z-10">
                     <div className="flex items-center gap-4">
                         <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 transition-colors">
@@ -180,7 +180,7 @@ export default function PulseEntryPage() {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-hidden flex flex-col relative bg-sky-50">
+                <main className="flex-1 flex flex-col relative bg-sky-50">
                     <PulseGrid
                         pulseId={id}
                         participantId={joinedParticipantId}

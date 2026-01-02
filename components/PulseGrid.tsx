@@ -356,7 +356,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
     });
 
     return (
-        <div className="w-full h-full overflow-auto relative select-none scrollbar-hide p-4 pb-32">
+        <div className="w-full relative select-none p-4 pb-32">
             <div className="min-w-[800px] bg-white/70 backdrop-blur-md rounded-3xl shadow-sm border border-white/50 ring-1 ring-black/5 mx-auto overflow-visible">
                 {/* Sticky Header Wrapper */}
                 <div className="sticky top-0 z-30 shadow-sm rounded-t-[1.5rem] overflow-hidden">
