@@ -289,7 +289,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 onMouseDown={() => handleMouseDown(d, 0)}
                                 onMouseEnter={() => handleMouseEnter(d, 0)}
                                 className={`
-                                    relative flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 cursor-pointer
+                                    relative flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 cursor-pointer touch-pan-y
                                     ${bgClass}
                                     ${isSelected && !isOrganizer ? 'ring-4 ring-sky-400/30 border-sky-500 shadow-xl scale-105 z-20' : `${monthBorder} hover:shadow-xl hover:scale-105 hover:-translate-y-1`}
                                     ring-1 ring-black/5
