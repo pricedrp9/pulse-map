@@ -212,8 +212,8 @@ export default function PulseEntryPage() {
                     />
                 </main>
 
-                {/* Fixed "Done" Button for Responders */}
-                {!isOrganizer && (
+                {/* Fixed "Done" Button for Responders (and Organizers who joined) */}
+                {(
                     <button
                         onClick={handleToggleCompletion}
                         className={`fixed bottom-12 right-6 z-[999] flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl transition-all duration-300 font-bold border-2 ${isCompleted

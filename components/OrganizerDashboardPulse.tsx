@@ -52,6 +52,14 @@ export function OrganizerDashboardPulse({ id }: { id: string }) {
                             <span className="text-xs font-bold text-slate-400 uppercase">{participants.filter(p => p.is_completed).length}/{participants.length} Done</span>
                         </div>
 
+                        {/* Progress Bar */}
+                        <div className="w-full h-2 bg-slate-100 rounded-full mb-4 overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${participants.length > 0 ? (participants.filter(p => p.is_completed).length / participants.length) * 100 : 0}%` }}
+                            />
+                        </div>
+
                         <div className="space-y-2 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
                             {participants.length === 0 ? (
                                 <p className="text-sm text-slate-400 italic">No one has joined yet.</p>
