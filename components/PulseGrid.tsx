@@ -161,6 +161,23 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
             return newCounts;
         });
 
+        // Optimistic Name Update
+        setCellParticipants(prev => {
+            const newMap = { ...prev };
+            const list = newMap[key] || [];
+            const myName = "You"; // Default to "You" for immediate feedback
+
+            if (action === 'add') {
+                // Avoid duplicates if name already there (unlikely if 'You')
+                if (!list.includes(myName)) {
+                    newMap[key] = [...list, myName];
+                }
+            } else {
+                newMap[key] = list.filter(n => n !== myName); // Remove "You" (or actual name if we knew it fully)
+            }
+            return newMap;
+        });
+
         // Calculate Times
         const start = new Date(d);
         let end = new Date(start);
@@ -330,13 +347,13 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 {/* Mobile: Show names below count if plenty of space, or just keep it clean */}
                                 {count > 0 && (
                                     <div className="mt-2 flex flex-wrap justify-center gap-1 max-w-[90%] lg:hidden pointer-events-none">
-                                        {cellParticipants[key]?.slice(0, 2).map((name, i) => (
+                                        {cellParticipants[key]?.slice(0, 3).map((name, i) => (
                                             <span key={i} className="text-[8px] font-bold text-slate-600 bg-white/50 px-1.5 py-0.5 rounded-sm truncate max-w-[60px]">
                                                 {name}
                                             </span>
                                         ))}
-                                        {((cellParticipants[key]?.length || 0) > 2) && (
-                                            <span className={`text-[8px] font-bold px-1 ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-400'}`}>+ {(cellParticipants[key]?.length || 0) - 2}</span>
+                                        {((cellParticipants[key]?.length || 0) > 3) && (
+                                            <span className={`text-[8px] font-bold px-1 ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-400'}`}>+ {(cellParticipants[key]?.length || 0) - 3}</span>
                                         )}
                                     </div>
                                 )}
@@ -457,13 +474,19 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
 
                                     {/* Hover Tooltip for Names in Time Mode */}
                                     {count > 0 && (
-                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col bg-slate-800 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 whitespace-nowrap pointer-events-none">
-                                            {cellParticipants[key]?.slice(0, 5).map((name, i) => (
-                                                <div key={i}>{name}</div>
-                                            ))}
-                                            {(cellParticipants[key]?.length || 0) > 5 && (
-                                                <div className="text-slate-400">+ {(cellParticipants[key]?.length || 0) - 5} others</div>
-                                            )}
+                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col bg-slate-800 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 whitespace-nowrap min-w-[100px] pointer-events-none">
+                                            <div className="max-h-32 overflow-y-auto scrollbar-hide flex flex-col gap-0.5">
+                                                {cellParticipants[key]?.length > 0 ? (
+                                                    cellParticipants[key].map((name, i) => (
+                                                        <div key={i} className="px-1">{name}</div>
+                                                    ))
+                                                ) : (
+                                                    <div className="opacity-50 px-1">Loading...</div>
+                                                )}
+                                            </div>
+                                            <div className="mt-1 pt-1 border-t border-slate-700 text-center font-bold text-slate-400 text-[9px]">
+                                                {count} Participants
+                                            </div>
                                             {/* Arrow */}
                                             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
                                         </div>

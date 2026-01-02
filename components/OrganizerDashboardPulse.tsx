@@ -9,7 +9,7 @@ export function OrganizerDashboardPulse({ id }: { id: string }) {
     const supabase = createClient();
 
     useEffect(() => {
-        if (!isOpen) return;
+
 
         const fetchParticipants = async () => {
             const { data } = await supabase
@@ -29,7 +29,7 @@ export function OrganizerDashboardPulse({ id }: { id: string }) {
             .subscribe();
 
         return () => { supabase.removeChannel(channel); };
-    }, [id, isOpen, supabase]);
+    }, [id, supabase]);
 
     return (
         <div className="relative">
