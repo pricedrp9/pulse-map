@@ -440,7 +440,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
             {!isOrganizer && (
                 <button
                     onClick={handleToggleCompletion}
-                    className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all duration-300 font-bold ${isCompleted
+                    className={`fixed bottom-8 right-6 z-[100] flex items-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all duration-300 font-bold ${isCompleted
                         ? "bg-green-500 text-white hover:bg-green-600 ring-2 ring-green-200"
                         : "bg-slate-900 text-white hover:bg-slate-800 hover:scale-105"
                         }`}
@@ -450,13 +450,13 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
-                            <span>Submitted</span>
+                            <span>Done</span>
                         </>
                     ) : (
                         <>
-                            <span>Submit Availability</span>
+                            <span>Done</span>
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         </>
                     )}
