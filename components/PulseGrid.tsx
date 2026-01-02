@@ -440,7 +440,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
             {!isOrganizer && (
                 <button
                     onClick={handleToggleCompletion}
-                    className={`fixed bottom-8 right-6 z-[100] flex items-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all duration-300 font-bold ${isCompleted
+                    className={`fixed bottom-24 right-6 z-[999] flex items-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all duration-300 font-bold ${isCompleted
                         ? "bg-green-500 text-white hover:bg-green-600 ring-2 ring-green-200"
                         : "bg-slate-900 text-white hover:bg-slate-800 hover:scale-105"
                         }`}
