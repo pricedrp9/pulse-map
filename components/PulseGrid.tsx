@@ -81,26 +81,34 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
         return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
     }, []);
 
+    const [cellParticipants, setCellParticipants] = useState<Record<string, string[]>>({});
+
     useEffect(() => {
         const fetchAvailability = async () => {
             const { data, error } = await supabase
                 .from("availability")
-                .select("start_time, end_time, participant_id")
+                .select("start_time, end_time, participant_id, participants(name)")
                 .eq("pulse_id", pulseId);
 
             if (error || !data) return;
 
             const newCounts: Record<string, number> = {};
+            const newCellParticipants: Record<string, string[]> = {};
             const mySet = new Set<string>();
             let max = 1;
 
-            data.forEach((row) => {
+            data.forEach((row: any) => {
                 const localDate = new Date(row.start_time);
                 // In Date mode, we use hour 0 as the key for distinctness
                 const hKey = mode === 'dates' ? 0 : localDate.getHours();
                 const key = `${localDate.getFullYear()}-${localDate.getMonth()}-${localDate.getDate()}-${hKey}`;
 
                 newCounts[key] = (newCounts[key] || 0) + 1;
+
+                // Add name to list
+                if (!newCellParticipants[key]) newCellParticipants[key] = [];
+                if (row.participants?.name) newCellParticipants[key].push(row.participants.name);
+
                 if (newCounts[key] > max) max = newCounts[key];
 
                 if (row.participant_id === participantId) {
@@ -109,6 +117,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
             });
 
             setHeatmapCounts(newCounts);
+            setCellParticipants(newCellParticipants);
             setMyAvailability(mySet);
             setMaxCount(max);
         };
@@ -124,7 +133,6 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
     }, [pulseId, participantId, supabase, mode]);
 
     const toggleSlot = async (d: Date, hour: number, action: 'add' | 'remove') => {
-
 
         const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${hour}`;
         const isAvailable = myAvailability.has(key);
@@ -286,7 +294,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 onMouseDown={() => handleMouseDown(d, 0)}
                                 onMouseEnter={() => handleMouseEnter(d, 0)}
                                 className={`
-                                    relative flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 cursor-pointer touch-pan-y
+                                    relative flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 cursor-pointer touch-pan-y group
                                     ${bgClass}
                                     ${isSelected && !isOrganizer ? 'ring-4 ring-sky-400/30 border-sky-500 shadow-xl scale-105 z-20' : `${monthBorder} hover:shadow-xl hover:scale-105 hover:-translate-y-1`}
                                     ring-1 ring-black/5
@@ -304,6 +312,34 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 <div className={`text-[10px] font-bold uppercase tracking-wide bg-black/10 px-2 py-1 rounded-full ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-400'}`}>
                                     {count > 0 ? `${count} Free` : 'Add'}
                                 </div>
+
+                                {/* Participant Names List (Desktop Hover / Mobile Visible) */}
+                                {count > 0 && (
+                                    <div className={`absolute top-2 right-2 flex flex-col items-end opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-600'}`}>
+                                        {cellParticipants[key]?.slice(0, 3).map((name, i) => (
+                                            <span key={i} className="text-[9px] font-bold bg-white/90 text-slate-600 px-1.5 py-0.5 rounded-full mb-0.5 shadow-sm whitespace-nowrap">
+                                                {name}
+                                            </span>
+                                        ))}
+                                        {cellParticipants[key]?.length > 3 && (
+                                            <span className="text-[9px] font-bold px-1.5">+ {cellParticipants[key].length - 3}</span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Mobile: Show names below count if plenty of space, or just keep it clean */}
+                                {count > 0 && (
+                                    <div className="mt-2 flex flex-wrap justify-center gap-1 max-w-[90%] lg:hidden pointer-events-none">
+                                        {cellParticipants[key]?.slice(0, 2).map((name, i) => (
+                                            <span key={i} className="text-[8px] font-bold text-slate-600 bg-white/50 px-1.5 py-0.5 rounded-sm truncate max-w-[60px]">
+                                                {name}
+                                            </span>
+                                        ))}
+                                        {((cellParticipants[key]?.length || 0) > 2) && (
+                                            <span className={`text-[8px] font-bold px-1 ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-400'}`}>+ {(cellParticipants[key]?.length || 0) - 2}</span>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
@@ -408,6 +444,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                     key={key}
                                     onMouseDown={() => handleMouseDown(d, hour)}
                                     onMouseEnter={() => handleMouseEnter(d, hour)}
+                                    // Tooltip Logic for Time Mode (simpler)
                                     className="flex-1 border-r border-slate-50 cursor-pointer relative group"
                                 >
                                     <div className={`absolute inset-1 rounded-lg transition-all duration-200 ${bgClass} ${isSelected && !isOrganizer ? 'ring-2 ring-sky-500 bg-sky-50 z-10 scale-90 shadow-lg' : 'group-hover:scale-95 group-hover:-translate-y-0.5 group-hover:shadow-md'}`}>
@@ -417,6 +454,20 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                             </div>
                                         )}
                                     </div>
+
+                                    {/* Hover Tooltip for Names in Time Mode */}
+                                    {count > 0 && (
+                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col bg-slate-800 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 whitespace-nowrap pointer-events-none">
+                                            {cellParticipants[key]?.slice(0, 5).map((name, i) => (
+                                                <div key={i}>{name}</div>
+                                            ))}
+                                            {(cellParticipants[key]?.length || 0) > 5 && (
+                                                <div className="text-slate-400">+ {(cellParticipants[key]?.length || 0) - 5} others</div>
+                                            )}
+                                            {/* Arrow */}
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
