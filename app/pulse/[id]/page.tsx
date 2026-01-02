@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { PulseGrid } from "@/components/PulseGrid";
 import { ConfirmedView } from "@/components/ConfirmedView";
+import { OrganizerDashboardPulse } from "@/components/OrganizerDashboardPulse";
 
 export default function PulseEntryPage() {
     const params = useParams();
@@ -128,6 +129,9 @@ export default function PulseEntryPage() {
                 <header className="bg-white shadow-sm p-4 flex justify-between items-center z-10">
                     <h1 className="text-xl font-bold text-slate-800 tracking-tight">{pulse?.title || "Pulse Map"}</h1>
                     <div className="flex items-center gap-3">
+                        {isOrganizer && (
+                            <OrganizerDashboardPulse id={id} />
+                        )}
                         <button
                             onClick={async () => {
                                 const url = window.location.href;
