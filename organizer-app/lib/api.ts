@@ -108,4 +108,24 @@ export const finalizePulse = async (pulseId: string, start: string, end: string)
         .eq("id", pulseId);
 
     if (error) throw error;
+
+    // Trigger email notifications via the Next.js API
+    // We use the public URL + /api/finalize
+    try {
+        const webUrl = process.env.EXPO_PUBLIC_WEB_URL || "https://pulse-map-chi.vercel.app";
+        const response = await fetch(`${webUrl}/api/finalize`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ pulseId }),
+        });
+
+        if (!response.ok) {
+            console.error("Failed to trigger emails:", await response.text());
+        }
+    } catch (emailError) {
+        console.error("Email trigger failed", emailError);
+        // We don't throw here because the pulse IS finalized, we just failed to notify.
+    }
 };
