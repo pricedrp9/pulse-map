@@ -63,16 +63,16 @@ END:VEVENT
     };
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-green-50 p-6 text-center">
-            <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-green-100 max-h-screen overflow-y-auto">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-green-50 dark:bg-slate-900 p-6 text-center transition-colors">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl max-w-md w-full border border-green-100 dark:border-green-900/30 max-h-screen overflow-y-auto transition-colors">
                 <div className="mb-6">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                        <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                        <svg className="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h1 className="mt-4 text-2xl font-bold text-slate-800">It's Official!</h1>
-                    <p className="text-slate-500">{pulse.title || "Social Event"}</p>
+                    <h1 className="mt-4 text-2xl font-bold text-slate-800 dark:text-white">It's Official!</h1>
+                    <p className="text-slate-500 dark:text-slate-400">{pulse.title || "Social Event"}</p>
                 </div>
 
                 <div className="space-y-4 mb-6">
@@ -80,13 +80,13 @@ END:VEVENT
                         const s = new Date(sel.start);
                         const e = new Date(sel.end);
                         return (
-                            <div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <p className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Option {i + 1}</p>
-                                <div className="mt-2 text-slate-900">
+                            <div key={i} className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                                <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">Option {i + 1}</p>
+                                <div className="mt-2 text-slate-900 dark:text-white">
                                     <p className="text-lg font-bold">
                                         {s.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                                     </p>
-                                    <p className="text-xl font-extrabold text-blue-600 mt-1">
+                                    <p className="text-xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
                                         {/* For Dates Mode, show "All Day" or similar if needed, otherwise show time range */}
                                         {pulse.mode === 'dates'
                                             ? "All Day"
@@ -102,7 +102,7 @@ END:VEVENT
                 <div className="space-y-3">
                     <button
                         onClick={handleDownloadCalendar}
-                        className="w-full rounded-xl bg-slate-900 py-3.5 font-bold text-white shadow-md hover:bg-slate-800 hover:scale-[1.02] transition-all"
+                        className="w-full rounded-xl bg-slate-900 dark:bg-sky-600 py-3.5 font-bold text-white shadow-md hover:bg-slate-800 dark:hover:bg-sky-500 hover:scale-[1.02] transition-all"
                     >
                         Add to Calendar (.ics)
                     </button>
@@ -110,7 +110,7 @@ END:VEVENT
                     {isOrganizer && (
                         <button
                             onClick={handleReOpen}
-                            className="w-full rounded-xl bg-white border-2 border-slate-100 py-3.5 font-bold text-slate-500 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-colors"
+                            className="w-full rounded-xl bg-white dark:bg-transparent border-2 border-slate-100 dark:border-slate-700 py-3.5 font-bold text-slate-500 dark:text-slate-400 hover:text-red-500 hover:border-red-100 dark:hover:border-red-900 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
                         >
                             Re-Open Voting
                         </button>

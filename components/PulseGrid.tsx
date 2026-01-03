@@ -41,11 +41,11 @@ const formatHour = (h: number) => {
 }
 
 const getHeatmapClass = (count: number, maxCount: number) => {
-    if (count === 0) return "bg-white";
+    if (count === 0) return "bg-white dark:bg-slate-800";
     const ratio = count / Math.max(maxCount, 2);
-    if (ratio < 0.33) return "bg-sky-100";
-    if (ratio < 0.66) return "bg-sky-300";
-    return "bg-sky-600";
+    if (ratio < 0.33) return "bg-sky-100 dark:bg-sky-900/40";
+    if (ratio < 0.66) return "bg-sky-300 dark:bg-sky-600/60";
+    return "bg-sky-600 dark:bg-sky-500";
 };
 
 export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, startDate, mode = "times" }: PulseGridProps) {
@@ -313,14 +313,14 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 className={`
                                     relative flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 cursor-pointer touch-pan-y group
                                     ${bgClass}
-                                    ${isSelected && !isOrganizer ? 'ring-4 ring-sky-400/30 border-sky-500 shadow-xl scale-105 z-20' : `${monthBorder} hover:shadow-xl hover:scale-105 hover:-translate-y-1`}
-                                    ring-1 ring-black/5
+                                    ${isSelected && !isOrganizer ? 'ring-4 ring-sky-400/30 border-sky-500 shadow-xl scale-105 z-20' : `${monthBorder} dark:border-slate-700 hover:shadow-xl hover:scale-105 hover:-translate-y-1`}
+                                    ring-1 ring-black/5 dark:ring-white/5
                                 `}
                             >
-                                <div className={`text-xs font-bold uppercase mb-2 tracking-widest ${count / maxCount > 0.5 ? 'text-white/90' : 'text-slate-400'}`}>
+                                <div className={`text-xs font-bold uppercase mb-2 tracking-widest ${count / maxCount > 0.5 ? 'text-white/90' : 'text-slate-400 dark:text-slate-500'}`}>
                                     {d.toLocaleDateString("en-US", { weekday: "short" })}
                                 </div>
-                                <div className={`text-3xl font-black mb-1 ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-800'}`}>
+                                <div className={`text-3xl font-black mb-1 ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
                                     <span className="text-[10px] font-bold block uppercase mb-1 tracking-widest opacity-60 text-center leading-none">
                                         {d.toLocaleDateString("en-US", { month: "short" })}
                                     </span>
@@ -332,9 +332,9 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
 
                                 {/* Participant Names List (Desktop Hover / Mobile Visible) */}
                                 {count > 0 && (
-                                    <div className={`absolute top-2 right-2 flex flex-col items-end opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-600'}`}>
+                                    <div className={`absolute top-2 right-2 flex flex-col items-end opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-600 dark:text-slate-300'}`}>
                                         {cellParticipants[key]?.slice(0, 3).map((name, i) => (
-                                            <span key={i} className="text-[9px] font-bold bg-white/90 text-slate-600 px-1.5 py-0.5 rounded-full mb-0.5 shadow-sm whitespace-nowrap">
+                                            <span key={i} className="text-[9px] font-bold bg-white/90 dark:bg-slate-700/90 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded-full mb-0.5 shadow-sm whitespace-nowrap">
                                                 {name}
                                             </span>
                                         ))}
@@ -348,12 +348,12 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                 {count > 0 && (
                                     <div className="mt-2 flex flex-wrap justify-center gap-1 max-w-[90%] lg:hidden pointer-events-none">
                                         {cellParticipants[key]?.slice(0, 3).map((name, i) => (
-                                            <span key={i} className="text-[8px] font-bold text-slate-600 bg-white/50 px-1.5 py-0.5 rounded-sm truncate max-w-[60px]">
+                                            <span key={i} className="text-[8px] font-bold text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded-sm truncate max-w-[60px]">
                                                 {name}
                                             </span>
                                         ))}
                                         {((cellParticipants[key]?.length || 0) > 3) && (
-                                            <span className={`text-[8px] font-bold px-1 ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-400'}`}>+ {(cellParticipants[key]?.length || 0) - 3}</span>
+                                            <span className={`text-[8px] font-bold px-1 ${count / maxCount > 0.5 ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`}>+ {(cellParticipants[key]?.length || 0) - 3}</span>
                                         )}
                                     </div>
                                 )}
@@ -407,17 +407,17 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
 
     return (
         <div className="w-full relative select-none p-4 pb-32">
-            <div className="min-w-[800px] bg-white/70 backdrop-blur-md rounded-3xl shadow-sm border border-white/50 ring-1 ring-black/5 mx-auto overflow-visible">
+            <div className="min-w-[800px] bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-3xl shadow-sm border border-white/50 dark:border-slate-700/50 ring-1 ring-black/5 dark:ring-white/5 mx-auto overflow-visible transition-colors">
                 {/* Sticky Header Wrapper */}
-                <div className="sticky top-0 z-30 shadow-sm rounded-t-[1.5rem] overflow-hidden">
+                <div className="sticky top-0 z-30 shadow-sm dark:shadow-slate-900 rounded-t-[1.5rem] overflow-hidden">
                     {/* Month Header */}
-                    <div className="flex bg-slate-50/95 backdrop-blur border-b border-slate-100">
-                        <div className="sticky left-0 z-40 w-20 flex-shrink-0 bg-slate-50 border-r border-slate-100 shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)]"></div>
+                    <div className="flex bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-100 dark:border-slate-700/50 transition-colors">
+                        <div className="sticky left-0 z-40 w-20 flex-shrink-0 bg-slate-50 dark:bg-slate-900 border-r border-slate-100 dark:border-slate-700/50 shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)] dark:shadow-none"></div>
                         {timeMonths.map((m, i) => (
                             <div
                                 key={i}
                                 style={{ flexGrow: m.colspan, flexBasis: 0 }}
-                                className={`py-3 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-r border-slate-100 last:border-r-0 ${m.color}`}
+                                className={`py-3 text-center text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] border-r border-slate-100 dark:border-slate-700/50 last:border-r-0 ${m.color === "bg-white" ? "bg-white dark:bg-slate-800" : "bg-sky-50/50 dark:bg-slate-800/50"}`}
                             >
                                 {m.name}
                             </div>
@@ -425,14 +425,14 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                     </div>
 
                     {/* Day Header */}
-                    <div className="flex border-b border-slate-100 bg-white/95 backdrop-blur">
-                        <div className="sticky left-0 z-40 w-20 flex-shrink-0 border-r border-slate-100 bg-white shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)]"></div>
+                    <div className="flex border-b border-slate-100 dark:border-slate-700/50 bg-white/95 dark:bg-slate-800/95 backdrop-blur transition-colors">
+                        <div className="sticky left-0 z-40 w-20 flex-shrink-0 border-r border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800 shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)] dark:shadow-none"></div>
                         {dates.map((d, i) => {
                             const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                             return (
-                                <div key={i} className={`flex-1 px-1 py-4 text-center border-r border-slate-50 ${isWeekend ? 'bg-sky-50/30' : 'bg-white'}`}>
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{d.toLocaleDateString("en-US", { weekday: "short" })}</div>
-                                    <div className="text-xl font-black text-slate-800">{d.getDate()}</div>
+                                <div key={i} className={`flex-1 px-1 py-4 text-center border-r border-slate-50 dark:border-slate-700/30 ${isWeekend ? 'bg-sky-50/30 dark:bg-slate-700/20' : 'bg-white dark:bg-slate-800'}`}>
+                                    <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">{d.toLocaleDateString("en-US", { weekday: "short" })}</div>
+                                    <div className="text-xl font-black text-slate-800 dark:text-white">{d.getDate()}</div>
                                 </div>
                             )
                         })}
@@ -441,8 +441,8 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
 
                 {/* Rows */}
                 {hours.map((hour) => (
-                    <div key={hour} className="flex border-b border-slate-50 h-16 group/row hover:bg-sky-50/30 transition-colors">
-                        <div className="sticky left-0 z-20 w-20 flex-shrink-0 flex items-center justify-end pr-4 text-[10px] font-bold text-slate-400 bg-white border-r border-slate-100 uppercase tracking-wider shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)]">
+                    <div key={hour} className="flex border-b border-slate-50 dark:border-slate-700/30 h-16 group/row hover:bg-sky-50/30 dark:hover:bg-slate-700/30 transition-colors">
+                        <div className="sticky left-0 z-20 w-20 flex-shrink-0 flex items-center justify-end pr-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-700/50 uppercase tracking-wider shadow-[4px_0_24px_-2px_rgba(0,0,0,0.05)] dark:shadow-none transition-colors">
                             {formatHour(hour)}
                         </div>
 
@@ -462,19 +462,19 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                     onMouseDown={() => handleMouseDown(d, hour)}
                                     onMouseEnter={() => handleMouseEnter(d, hour)}
                                     // Tooltip Logic for Time Mode (simpler)
-                                    className="flex-1 border-r border-slate-50 cursor-pointer relative group"
+                                    className="flex-1 border-r border-slate-50 dark:border-slate-700/30 cursor-pointer relative group"
                                 >
-                                    <div className={`absolute inset-1 rounded-lg transition-all duration-200 ${bgClass} ${isSelected && !isOrganizer ? 'ring-2 ring-sky-500 bg-sky-50 z-10 scale-90 shadow-lg' : 'group-hover:scale-95 group-hover:-translate-y-0.5 group-hover:shadow-md'}`}>
+                                    <div className={`absolute inset-1 rounded-lg transition-all duration-200 ${bgClass} ${isSelected && !isOrganizer ? 'ring-2 ring-sky-500 bg-sky-50 dark:bg-sky-900/50 z-10 scale-90 shadow-lg' : 'group-hover:scale-95 group-hover:-translate-y-0.5 group-hover:shadow-md'}`}>
                                         {count > 0 && (
                                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <span className={`text-[10px] font-bold ${count / maxCount > 0.5 ? 'text-white' : 'text-sky-900/50'}`}>{count}</span>
+                                                <span className={`text-[10px] font-bold ${count / maxCount > 0.5 ? 'text-white' : 'text-sky-900/50 dark:text-sky-200/50'}`}>{count}</span>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Hover Tooltip for Names in Time Mode */}
                                     {count > 0 && (
-                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col bg-slate-800 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 whitespace-nowrap min-w-[100px] pointer-events-none">
+                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col bg-slate-800 dark:bg-slate-950 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 whitespace-nowrap min-w-[100px] pointer-events-none ring-1 ring-white/10">
                                             <div className="max-h-32 overflow-y-auto scrollbar-hide flex flex-col gap-0.5">
                                                 {cellParticipants[key]?.length > 0 ? (
                                                     cellParticipants[key].map((name, i) => (
@@ -484,11 +484,11 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                                                     <div className="opacity-50 px-1">Loading...</div>
                                                 )}
                                             </div>
-                                            <div className="mt-1 pt-1 border-t border-slate-700 text-center font-bold text-slate-400 text-[9px]">
+                                            <div className="mt-1 pt-1 border-t border-slate-700/50 text-center font-bold text-slate-400 text-[9px]">
                                                 {count} Participants
                                             </div>
                                             {/* Arrow */}
-                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800 dark:border-t-slate-950"></div>
                                         </div>
                                     )}
                                 </div>
