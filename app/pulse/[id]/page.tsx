@@ -8,6 +8,7 @@ import { ConfirmedView } from "@/components/ConfirmedView";
 import { OrganizerDashboardPulse } from "@/components/OrganizerDashboardPulse";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { HowToModal } from "@/components/HowToModal";
 
 export default function PulseEntryPage() {
     const params = useParams();
@@ -30,6 +31,20 @@ export default function PulseEntryPage() {
 
     // Completion Status
     const [isCompleted, setIsCompleted] = useState(false);
+
+    // Help Widget State
+    const [showHelp, setShowHelp] = useState(false);
+
+    // Help Guide Auto-Open Logic
+    useEffect(() => {
+        if (joinedParticipantId) {
+            const hasSeen = localStorage.getItem('pulse_has_seen_guide');
+            if (!hasSeen) {
+                setShowHelp(true);
+                localStorage.setItem('pulse_has_seen_guide', 'true');
+            }
+        }
+    }, [joinedParticipantId]);
 
     useEffect(() => {
         if (!joinedParticipantId) return;
@@ -163,6 +178,13 @@ export default function PulseEntryPage() {
                             <OrganizerDashboardPulse id={id} />
                         )}
                         <button
+                            onClick={() => setShowHelp(true)}
+                            className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center"
+                            title="How to use"
+                        >
+                            ?
+                        </button>
+                        <button
                             onClick={async () => {
                                 const url = window.location.href;
                                 if (navigator.share) {
@@ -239,6 +261,7 @@ export default function PulseEntryPage() {
                         </>
                     )}
                 </button>
+                <HowToModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
             </div>
         );
     }
