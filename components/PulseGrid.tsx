@@ -57,8 +57,9 @@ const getHeatmapClass = (count: number, maxCount: number) => {
 export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, startDate, mode = "times" }: PulseGridProps) {
     const [dates, setDates] = useState(() => getDates(viewType, startDate));
 
-    // Dynamic rows based on mode
-    const hours = mode === 'dates' ? [0] : Array.from({ length: 24 }, (_, i) => i);
+    // Dynamic rows based on mode.
+    // Adjusted to start at 6 AM for "Specific Time" mode as requested.
+    const hours = mode === 'dates' ? [0] : Array.from({ length: 18 }, (_, i) => i + 6);
 
     useEffect(() => {
         setDates(getDates(viewType, startDate));
