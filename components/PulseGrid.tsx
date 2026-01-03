@@ -60,6 +60,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
 
     const [myAvailability, setMyAvailability] = useState<Set<string>>(new Set());
     const [heatmapCounts, setHeatmapCounts] = useState<Record<string, number>>({});
+    const [cellParticipants, setCellParticipants] = useState<Record<string, string[]>>({});
     const [maxCount, setMaxCount] = useState(1);
     const supabase = createClient();
 
@@ -81,7 +82,53 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
         return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
     }, []);
 
-    const [cellParticipants, setCellParticipants] = useState<Record<string, string[]>>({});
+    // Long Press / Mobile Details Logic
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [detailsModalData, setDetailsModalData] = useState<{ date: string, time: string, names: string[], count: number } | null>(null);
+    const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
+    const isLongPress = React.useRef(false);
+
+    const handleTouchStart = (d: Date, hour: number, count: number, names: string[]) => {
+        isLongPress.current = false;
+        longPressTimer.current = setTimeout(() => {
+            if (count > 0) {
+                isLongPress.current = true;
+                const timeLabel = mode === 'dates' ? "All Day" : formatHour(hour);
+                setDetailsModalData({
+                    date: d.toLocaleDateString("en-US", { weekday: 'short', month: 'short', day: 'numeric' }),
+                    time: timeLabel,
+                    names: names || [],
+                    count
+                });
+                setDetailsModalOpen(true);
+            }
+        }, 500); // 500ms threshold
+    };
+
+    const handleTouchEnd = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+    };
+
+    const handleTouchMove = () => {
+        // If moving, cancel the long press (user is scrolling)
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+    };
+
+    // Modified click/mousedown handler to respect long press
+    const handleCellClick = (d: Date, hour: number) => {
+        if (isLongPress.current) return; // Prevent vote if it was a long press
+        handleMouseDown(d, hour);
+    };
+
+    // ... (existing helper functions) ...
+
+
 
     useEffect(() => {
         const fetchAvailability = async () => {
@@ -275,6 +322,41 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
 
         return (
             <div className="pb-32 p-4 max-w-7xl mx-auto">
+                {/* Mobile Details Modal */}
+                {detailsModalOpen && detailsModalData && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setDetailsModalOpen(false)}>
+                        <div className="bg-white dark:bg-slate-900 w-full max-w-xs p-6 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                            <div className="text-center mb-6">
+                                <h3 className="text-lg font-black text-slate-800 dark:text-white mb-1">{detailsModalData.date}</h3>
+                                <p className="text-sm font-bold text-sky-500 dark:text-sky-400 uppercase tracking-widest">{detailsModalData.time}</p>
+                            </div>
+
+                            <div className="mb-4">
+                                <div className="flex items-center justify-between mb-2 px-2">
+                                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Participants</span>
+                                    <span className="text-xs font-bold bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full">{detailsModalData.count}</span>
+                                </div>
+                                <div className="max-h-[50vh] overflow-y-auto space-y-1 p-1">
+                                    {detailsModalData.names.map((name, i) => (
+                                        <div key={i} className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50">
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+                                                {name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <span className="font-bold text-slate-700 dark:text-slate-200">{name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setDetailsModalOpen(false)}
+                                className="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )}
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 select-none">
                     {/* Spacers for Grid Alignment */}
                     {spacers.map((s) => (
@@ -407,6 +489,39 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
 
     return (
         <div className="w-full relative select-none p-4 pb-32">
+            {/* Mobile Details Modal (Shared State) */}
+            {detailsModalOpen && detailsModalData && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setDetailsModalOpen(false)}>
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-xs p-6 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="text-center mb-6">
+                            <h3 className="text-lg font-black text-slate-800 dark:text-white mb-1">{detailsModalData.date}</h3>
+                            <p className="text-sm font-bold text-sky-500 dark:text-sky-400 uppercase tracking-widest">{detailsModalData.time}</p>
+                        </div>
+                        <div className="mb-4">
+                            <div className="flex items-center justify-between mb-2 px-2">
+                                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Participants</span>
+                                <span className="text-xs font-bold bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full">{detailsModalData.count}</span>
+                            </div>
+                            <div className="max-h-[50vh] overflow-y-auto space-y-1 p-1">
+                                {detailsModalData.names.map((name, i) => (
+                                    <div key={i} className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+                                            {name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <span className="font-bold text-slate-700 dark:text-slate-200">{name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setDetailsModalOpen(false)}
+                            className="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
             <div className="min-w-[800px] bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-3xl shadow-sm border border-white/50 dark:border-slate-700/50 ring-1 ring-black/5 dark:ring-white/5 mx-auto overflow-visible transition-colors">
                 {/* Sticky Header Wrapper */}
                 <div className="sticky top-0 z-30 shadow-sm dark:shadow-slate-900 rounded-t-[1.5rem] overflow-hidden">
@@ -459,8 +574,11 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                             return (
                                 <div
                                     key={key}
-                                    onMouseDown={() => handleMouseDown(d, hour)}
+                                    onMouseDown={() => handleCellClick(d, hour)}
                                     onMouseEnter={() => handleMouseEnter(d, hour)}
+                                    onTouchStart={() => handleTouchStart(d, hour, count, cellParticipants[key])}
+                                    onTouchEnd={handleTouchEnd}
+                                    onTouchMove={handleTouchMove}
                                     // Tooltip Logic for Time Mode (simpler)
                                     className="flex-1 border-r border-slate-50 dark:border-slate-700/30 cursor-pointer relative group"
                                 >
