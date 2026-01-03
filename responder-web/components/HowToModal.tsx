@@ -12,7 +12,7 @@ export function HowToModal({ isOpen, onClose, isOrganizer }: HowToModalProps) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
             <div
-                className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 animate-in zoom-in-95 duration-200 relative"
+                className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 animate-in zoom-in-95 duration-200 relative max-h-[85vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
