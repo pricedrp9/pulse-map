@@ -24,7 +24,13 @@ const getDates = (viewType: string, startDate?: string) => {
     const dates = [];
     const start = startDate ? new Date(startDate) : new Date();
 
-    for (let i = 0; i < days; i++) {
+    // Timezone Reconciliation:
+    // We add a buffer of 1 day before and 1 day after the theoretical range
+    // to ensure slots shifted by timezone differences are visible.
+    const bufferBefore = 1;
+    const bufferAfter = 1;
+
+    for (let i = -bufferBefore; i < days + bufferAfter; i++) {
         const d = new Date(start);
         d.setDate(start.getDate() + i);
         dates.push(d);
