@@ -261,7 +261,7 @@ export default function PulseEntryPage() {
                         </>
                     )}
                 </button>
-                <HowToModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+                <HowToModal isOpen={showHelp} onClose={() => setShowHelp(false)} isOrganizer={isOrganizer} />
             </div>
         );
     }

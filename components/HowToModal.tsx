@@ -3,9 +3,10 @@ import React from "react";
 interface HowToModalProps {
     isOpen: boolean;
     onClose: () => void;
+    isOrganizer?: boolean;
 }
 
-export function HowToModal({ isOpen, onClose }: HowToModalProps) {
+export function HowToModal({ isOpen, onClose, isOrganizer }: HowToModalProps) {
     if (!isOpen) return null;
 
     return (
@@ -45,6 +46,13 @@ export function HowToModal({ isOpen, onClose }: HowToModalProps) {
                         title="See Who's Free"
                         desc="Hover (Desktop) or Long Press (Mobile) to see names."
                     />
+                    {isOrganizer && (
+                        <GuideStep
+                            icon="👑"
+                            title="Finalize Event"
+                            desc="Use the toolbar at the bottom to enter 'Finalize Mode', pick the best time, and confirm."
+                        />
+                    )}
                 </div>
 
                 {/* Action */}
