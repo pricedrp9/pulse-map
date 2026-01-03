@@ -37,6 +37,11 @@ export function HowToModal({ isOpen, onClose, isOrganizer }: HowToModalProps) {
                         desc="Tap an existing slot again to remove it."
                     />
                     <GuideStep
+                        icon="✅"
+                        title="Mark as Done"
+                        desc="Tap the 'Done' button when you're finished to let the organizer know."
+                    />
+                    <GuideStep
                         icon="🔥"
                         title="Check the Heatmap"
                         desc="Darker blue means more people are free at that time."
