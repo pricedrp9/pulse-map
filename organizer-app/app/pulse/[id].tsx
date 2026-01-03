@@ -3,6 +3,7 @@ import { View, Text, SafeAreaView, Pressable, Share, ActivityIndicator, Alert } 
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getPulse, finalizePulse } from "../lib/api";
 import { HeatmapGrid } from "../components/HeatmapGrid";
+import { ParticipantsList } from "../components/ParticipantsList";
 import { toUTC } from "../lib/time";
 
 export default function PulseViewScreen() {
@@ -87,6 +88,7 @@ export default function PulseViewScreen() {
             </View>
 
             <View className="flex-1">
+                <ParticipantsList pulseId={id as string} />
                 <HeatmapGrid
                     pulseId={id as string}
                     viewType={pulse.view_type}

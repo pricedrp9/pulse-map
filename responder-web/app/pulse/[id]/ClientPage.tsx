@@ -49,8 +49,11 @@ export default function PulseClientPage() {
     useEffect(() => {
         if (!joinedParticipantId) return;
         const checkStatus = async () => {
-            const { data } = await supabase.from("participants").select("is_completed").eq("id", joinedParticipantId).single();
-            if (data) setIsCompleted(data.is_completed);
+            const { data } = await supabase.from("participants").select("is_completed, name").eq("id", joinedParticipantId).single();
+            if (data) {
+                setIsCompleted(data.is_completed);
+                if (data.name) setNickname(data.name);
+            }
         };
         checkStatus();
     }, [joinedParticipantId, supabase]);

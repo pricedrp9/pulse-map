@@ -94,6 +94,17 @@ export const getAvailability = async (pulseId: string) => {
         .eq("pulse_id", pulseId);
 
     if (error) throw error;
+    if (error) throw error;
+    return data;
+};
+
+export const getParticipants = async (pulseId: string) => {
+    const { data, error } = await supabase
+        .from("participants")
+        .select("id, name, is_completed")
+        .eq("pulse_id", pulseId);
+
+    if (error) throw error;
     return data;
 };
 
