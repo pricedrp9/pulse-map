@@ -32,35 +32,30 @@ export async function POST(request: Request) {
 
         // 3. Send Emails via Resend
         if (participants && participants.length > 0) {
-            console.log(`[📧 EMAIL SERVICE] Sending to ${participants.length} recipients...`);
+            const recipients = participants.map(p => p.email).filter(Boolean);
+            console.log(`[📧 EMAIL SERVICE] Sending single email to:`, recipients);
 
-            // Send in parallel
-            await Promise.all(participants.map(async (p: { name: string; email: string }) => {
-                try {
-                    await resend.emails.send({
-                        from: 'Pulse Map <onboarding@resend.dev>', // Default for testing, user should verify domain later
-                        to: p.email,
-                        subject: `It's Official! ${pulse.title} is Confirmed ✅`,
-                        html: `
-                            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-                                <h1 style="color: #0ea5e9;">It's Official!</h1>
-                                <p><strong>${pulse.title}</strong> has been confirmed.</p>
-                                <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; margin: 20px 0;">
-                                    <h2 style="margin: 0; color: #0284c7;">${dateStr}</h2>
-                                    <p style="margin: 5px 0 0 0; font-size: 18px; color: #555;">${timeStr}</p>
-                                </div>
-                                <p>See you there!</p>
-                                <p style="font-size: 12px; color: #888; margin-top: 30px;">Pulse Map - Coordinate time with anyone.</p>
+            if (recipients.length > 0) {
+                // Send one email to all participants (visible to each other, creating a thread)
+                await resend.emails.send({
+                    from: 'Pulse Map <onboarding@resend.dev>',
+                    to: recipients,
+                    subject: `It's Official! ${pulse.title} is Confirmed ✅`,
+                    html: `
+                        <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                            <h1 style="color: #0ea5e9;">It's Official!</h1>
+                            <p><strong>${pulse.title}</strong> has been confirmed.</p>
+                            <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                                <h2 style="margin: 0; color: #0284c7;">${dateStr}</h2>
+                                <p style="margin: 5px 0 0 0; font-size: 18px; color: #555;">${timeStr}</p>
                             </div>
-                        `
-                    });
-                    console.log(`   -> Sent to ${p.email}`);
-                } catch (emailError) {
-                    console.error(`   -> Failed to send to ${p.email}`, emailError);
-                }
-            }));
-
-            console.log(`[✅ EMAIL SERVICE] Completed.`);
+                            <p>See you there!</p>
+                            <p style="font-size: 12px; color: #888; margin-top: 30px;">Pulse Map - Coordinate time with anyone.</p>
+                        </div>
+                    `
+                });
+                console.log(`[✅ EMAIL SERVICE] Batch email sent.`);
+            }
         } else {
             console.log(`[ℹ️ EMAIL SERVICE] No participants with emails found.`);
         }
