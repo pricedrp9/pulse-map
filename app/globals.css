@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* Modern Palette: Shades of Blue */
   --background: #f0f9ff;
@@ -27,13 +29,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    /* Slate-900 */
-    --foreground: #f8fafc;
-    /* Slate-50 */
-  }
+/* Manually triggered dark mode via class */
+.dark {
+  --background: #0f172a;
+  /* Slate-900 */
+  --foreground: #f8fafc;
+  /* Slate-50 */
 }
 
 
@@ -47,4 +48,9 @@ body {
   /* Webflow Trend: Subtle Dot Matrix Texture */
   background-image: radial-gradient(#bae6fd 1px, transparent 1px);
   background-size: 32px 32px;
+}
+
+.dark body {
+  background-image: radial-gradient(#1e293b 1px, transparent 1px);
+  /* Slate-800 dots */
 }

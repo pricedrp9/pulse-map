@@ -7,6 +7,7 @@ import { PulseGrid } from "@/components/PulseGrid";
 import { ConfirmedView } from "@/components/ConfirmedView";
 import { OrganizerDashboardPulse } from "@/components/OrganizerDashboardPulse";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function PulseEntryPage() {
     const params = useParams();
@@ -146,17 +147,18 @@ export default function PulseEntryPage() {
     // If we are organizer but haven't joined, we fall through to the Join Form.
     if (joinedParticipantId) {
         return (
-            <div className="flex min-h-screen flex-col bg-slate-50">
-                <header className="bg-white shadow-sm p-4 flex justify-between items-center z-10">
+            <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-900 transition-colors">
+                <header className="bg-white dark:bg-slate-800 shadow-sm dark:shadow-slate-900 p-4 flex justify-between items-center z-10 transition-colors">
                     <div className="flex items-center gap-4">
-                        <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 transition-colors">
+                        <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </Link>
-                        <h1 className="text-xl font-bold text-slate-800 tracking-tight">{pulse?.title || "Pulse Map"}</h1>
+                        <h1 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">{pulse?.title || "Pulse Map"}</h1>
                     </div>
                     <div className="flex items-center gap-3">
+                        <ThemeToggle />
                         {isOrganizer && (
                             <OrganizerDashboardPulse id={id} />
                         )}
@@ -187,20 +189,20 @@ export default function PulseEntryPage() {
                                     }
                                 }
                             }}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-bold transition-colors"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-full text-xs font-bold transition-colors"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                             </svg>
                             <span id="share-btn-text">Share</span>
                         </button>
-                        <div className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                        <div className="text-sm font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800">
                             {isOrganizer ? "Organizer" : "Joined"}
                         </div>
                     </div>
                 </header>
 
-                <main className="flex-1 flex flex-col relative bg-sky-50">
+                <main className="flex-1 flex flex-col relative bg-sky-50 dark:bg-slate-900 transition-colors">
                     <PulseGrid
                         pulseId={id}
                         participantId={joinedParticipantId}
@@ -217,8 +219,8 @@ export default function PulseEntryPage() {
                     className={`fixed right-6 z-[1000] flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl transition-all duration-300 font-bold border-2 
                     ${isOrganizer ? "bottom-24" : "bottom-12"} 
                     ${isCompleted
-                            ? "bg-green-500 text-white border-green-600 shadow-green-200"
-                            : "bg-slate-900 text-white border-slate-900 hover:bg-slate-800 hover:scale-105"
+                            ? "bg-green-500 text-white border-green-600 shadow-green-200 dark:shadow-green-900/50"
+                            : "bg-slate-900 dark:bg-sky-600 text-white border-slate-900 dark:border-sky-500 hover:bg-slate-800 dark:hover:bg-sky-500 hover:scale-105"
                         }`}
                 >
                     {isCompleted ? (
@@ -242,20 +244,23 @@ export default function PulseEntryPage() {
     }
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-sky-50 p-6">
-            <div className="w-full max-w-md rounded-[2rem] bg-white p-8 shadow-2xl shadow-sky-100 border border-sky-50">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-sky-50 dark:bg-slate-900 p-6 transition-colors">
+            <div className="absolute top-6 right-6 z-50">
+                <ThemeToggle />
+            </div>
+            <div className="w-full max-w-md rounded-[2rem] bg-white dark:bg-slate-800 p-8 shadow-2xl shadow-sky-100 dark:shadow-slate-900 border border-sky-50 dark:border-slate-700 transition-colors">
                 <div className="mb-8 text-center">
-                    <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-2 bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
+                    <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white mb-2 bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
                         Pulse Map
                     </h1>
-                    <p className="text-lg text-slate-600 font-medium">
+                    <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
                         {pulse ? `Join "${pulse.title || "Social Event"}"` : "Loading..."}
                     </p>
                 </div>
 
                 <div className="space-y-6">
                     <div>
-                        <label htmlFor="nickname" className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pl-4">
+                        <label htmlFor="nickname" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 pl-4">
                             Your Nickname
                         </label>
                         <input
@@ -264,13 +269,13 @@ export default function PulseEntryPage() {
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
                             placeholder="e.g. Alice"
-                            className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:ring-4 focus:ring-sky-100 transition-all outline-none"
+                            className="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900 transition-all outline-none"
                             suppressHydrationWarning
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="email" className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pl-4">
+                        <label htmlFor="email" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 pl-4">
                             Email (Optional)
                         </label>
                         <input
@@ -279,7 +284,7 @@ export default function PulseEntryPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="To get notified when finalized"
-                            className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:ring-4 focus:ring-sky-100 transition-all outline-none"
+                            className="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900 transition-all outline-none"
                             suppressHydrationWarning
                         />
                     </div>
@@ -287,7 +292,7 @@ export default function PulseEntryPage() {
                     <button
                         onClick={handleJoin}
                         disabled={loading || !pulse || !nickname.trim()}
-                        className="w-full mt-2 bg-slate-900 text-white rounded-2xl py-5 text-lg font-black tracking-wide shadow-xl hover:bg-black hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all duration-300"
+                        className="w-full mt-2 bg-slate-900 dark:bg-sky-600 text-white rounded-2xl py-5 text-lg font-black tracking-wide shadow-xl hover:bg-black dark:hover:bg-sky-500 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all duration-300"
                     >
                         {loading ? "Joining..." : "Continue"}
                     </button>
