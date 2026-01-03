@@ -15,7 +15,8 @@ export default function PulseViewScreen() {
     const [isFinalizing, setIsFinalizing] = useState(false);
 
     // In a real app we'd construct this from Env vars or linking config
-    const shareUrl = `http://localhost:3000/pulse/${id}`;
+    const webUrl = process.env.EXPO_PUBLIC_WEB_URL || "https://pulse-map-chi.vercel.app";
+    const shareUrl = `${webUrl}/pulse/${id}`;
 
     useEffect(() => {
         async function fetchPulse() {
