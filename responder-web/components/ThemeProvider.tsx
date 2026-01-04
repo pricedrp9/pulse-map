@@ -21,7 +21,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     useEffect(() => {
         // 1. Check persistence
-        const stored = localStorage.getItem("theme") as Theme | null;
+        const stored = localStorage.getItem("pulse_theme_v1") as Theme | null;
         if (stored) {
             setTheme(stored);
         }
@@ -38,7 +38,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         } else {
             root.classList.remove("dark");
         }
-        localStorage.setItem("theme", theme);
+        localStorage.setItem("pulse_theme_v1", theme);
     }, [theme, mounted]);
 
     const toggleTheme = () => {
