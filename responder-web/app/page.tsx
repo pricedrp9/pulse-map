@@ -129,7 +129,7 @@ export default function Home() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 dark:text-white focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900 transition-all outline-none [color-scheme:light] dark:[color-scheme:dark]"
+                className="w-full max-w-full bg-slate-50 dark:bg-slate-900 border-none rounded-2xl px-6 py-4 text-lg font-bold text-slate-800 dark:text-white focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-900 transition-all outline-none appearance-none [color-scheme:light] dark:[color-scheme:dark]"
               />
             </div>
 
