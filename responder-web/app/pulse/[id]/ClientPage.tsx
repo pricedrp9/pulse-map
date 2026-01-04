@@ -10,6 +10,8 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { HowToModal } from "@/components/HowToModal";
 
+import { DoneConfirmationModal } from "@/components/DoneConfirmationModal";
+
 export default function PulseClientPage() {
     const params = useParams();
     const router = useRouter();
@@ -34,6 +36,7 @@ export default function PulseClientPage() {
 
     // Help Widget State
     const [showHelp, setShowHelp] = useState(false);
+    const [showDoneConfirm, setShowDoneConfirm] = useState(false);
 
     // Help Guide Auto-Open Logic
     useEffect(() => {
@@ -59,9 +62,26 @@ export default function PulseClientPage() {
     }, [joinedParticipantId, supabase]);
 
     const handleToggleCompletion = async () => {
-        const newVal = !isCompleted;
-        setIsCompleted(newVal);
-        await supabase.from("participants").update({ is_completed: newVal }).eq("id", joinedParticipantId);
+        // If currently false (Thinking), user wants to set to Done -> Show Confirm
+        if (!isCompleted) {
+            setShowDoneConfirm(true);
+            return;
+        }
+
+        // If currently true (Done), user wants to set to Thinking -> Do immediately
+        setIsCompleted(false);
+        await supabase.from("participants").update({ is_completed: false }).eq("id", joinedParticipantId);
+    };
+
+    const confirmCompletion = async () => {
+        setIsCompleted(true);
+        await supabase.from("participants").update({ is_completed: true }).eq("id", joinedParticipantId);
+
+        // Notify API
+        fetch("/api/notify/done", {
+            method: "POST",
+            body: JSON.stringify({ pulseId: id, participantName: nickname }),
+        }).catch(err => console.error("Notify failed", err));
     };
 
     useEffect(() => {
@@ -265,6 +285,11 @@ export default function PulseClientPage() {
                     )}
                 </button>
                 <HowToModal isOpen={showHelp} onClose={() => setShowHelp(false)} isOrganizer={isOrganizer} />
+                <DoneConfirmationModal
+                    isOpen={showDoneConfirm}
+                    onClose={() => setShowDoneConfirm(false)}
+                    onConfirm={confirmCompletion}
+                />
             </div>
         );
     }
