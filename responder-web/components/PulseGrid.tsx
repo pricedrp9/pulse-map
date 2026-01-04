@@ -49,6 +49,8 @@ const formatHour = (h: number) => {
 
 const getHeatmapClass = (count: number, maxCount: number) => {
     if (count === 0) return "bg-white dark:bg-slate-800";
+    if (count === maxCount) return "bg-emerald-400 dark:bg-emerald-500 shadow-emerald-200 dark:shadow-emerald-900/40 border-emerald-500 dark:border-emerald-400";
+
     const ratio = count / Math.max(maxCount, 2);
     if (ratio < 0.33) return "bg-sky-100 dark:bg-sky-900/40";
     if (ratio < 0.66) return "bg-sky-300 dark:bg-sky-600/60";
