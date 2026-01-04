@@ -249,7 +249,11 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
         if (action === 'remove') {
             await supabase.from("availability").delete().match({ participant_id: participantId, start_time: start.toISOString() });
         } else {
-            await supabase.from("availability").insert({ participant_id: participantId, pulse_id: pulseId, start_time: start.toISOString(), end_time: end.toISOString() });
+            // Use upsert to handle potential race conditions (requires unique constraint on DB)
+            await supabase.from("availability").upsert(
+                { participant_id: participantId, pulse_id: pulseId, start_time: start.toISOString(), end_time: end.toISOString() },
+                { onConflict: 'participant_id, pulse_id, start_time' }
+            );
         }
     };
 
