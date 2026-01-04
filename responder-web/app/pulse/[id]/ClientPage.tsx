@@ -256,6 +256,7 @@ export default function PulseClientPage() {
                         startDate={pulse?.start_date}
                         isOrganizer={isOrganizer}
                         mode={pulse?.mode || "times"}
+                        participantName={nickname}
                     />
                 </main>
 

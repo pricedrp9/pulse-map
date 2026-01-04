@@ -12,6 +12,7 @@ interface PulseGridProps {
     isOrganizer?: boolean;
     startDate?: string;
     mode?: "times" | "dates";
+    participantName?: string;
 }
 
 const getDates = (viewType: string, startDate?: string) => {
@@ -54,7 +55,7 @@ const getHeatmapClass = (count: number, maxCount: number) => {
     return "bg-sky-600 dark:bg-sky-500";
 };
 
-export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, startDate, mode = "times" }: PulseGridProps) {
+export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, startDate, mode = "times", participantName }: PulseGridProps) {
     const [dates, setDates] = useState(() => getDates(viewType, startDate));
 
     // Dynamic rows based on mode.
@@ -219,7 +220,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
         setCellParticipants(prev => {
             const newMap = { ...prev };
             const list = newMap[key] || [];
-            const myName = "You"; // Default to "You" for immediate feedback
+            const myName = participantName || "You"; // Default to "You" for immediate feedback
 
             if (action === 'add') {
                 // Avoid duplicates if name already there (unlikely if 'You')
@@ -227,7 +228,7 @@ export function PulseGrid({ pulseId, participantId, viewType, isOrganizer, start
                     newMap[key] = [...list, myName];
                 }
             } else {
-                newMap[key] = list.filter(n => n !== myName); // Remove "You" (or actual name if we knew it fully)
+                newMap[key] = list.filter(n => n !== myName && n !== "You"); // Remove both to be safe
             }
             return newMap;
         });
