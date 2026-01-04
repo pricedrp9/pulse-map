@@ -186,23 +186,23 @@ export default function PulseClientPage() {
     if (joinedParticipantId) {
         return (
             <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-900 transition-colors">
-                <header className="bg-white dark:bg-slate-800 shadow-sm dark:shadow-slate-900 p-4 flex justify-between items-center z-10 transition-colors">
-                    <div className="flex items-center gap-4">
+                <header className="bg-white dark:bg-slate-800 shadow-sm dark:shadow-slate-900 p-3 md:p-4 flex justify-between items-center z-10 transition-colors gap-2">
+                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
                         <Link href="/dashboard" className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </Link>
-                        <h1 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">{pulse?.title || "Pulse Map"}</h1>
+                        <h1 className="text-lg md:text-xl font-bold text-slate-800 dark:text-white tracking-tight truncate max-w-[120px] md:max-w-none">{pulse?.title || "Pulse Map"}</h1>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
                         <ThemeToggle />
                         {isOrganizer && (
                             <OrganizerDashboardPulse id={id} />
                         )}
                         <button
                             onClick={() => setShowHelp(true)}
-                            className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center"
+                            className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center shrink-0"
                             title="How to use"
                         >
                             ?
@@ -234,16 +234,13 @@ export default function PulseClientPage() {
                                     }
                                 }
                             }}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-full text-xs font-bold transition-colors"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-full text-xs font-bold transition-colors shrink-0"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                             </svg>
-                            <span id="share-btn-text">Share</span>
+                            <span id="share-btn-text" className="hidden md:inline">Share</span>
                         </button>
-                        <div className="text-sm font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800">
-                            {isOrganizer ? "Organizer" : "Joined"}
-                        </div>
                     </div>
                 </header>
 
